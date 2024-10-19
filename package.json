@@ -1,7 +1,7 @@
 {
   "name": "teams-builder",
   "private": true,
-  "homepage": "https://tu-usuario.github.io/teams-builder",
+  "homepage": "https://bragonip.github.io/teams-builder",
   "version": "0.0.0",
   "type": "module",
   "scripts": {
