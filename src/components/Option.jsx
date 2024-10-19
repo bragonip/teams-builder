@@ -1,11 +1,9 @@
-const Option = (optionName) => {
-    return(
+const Option = ({ optionName }) => {
+    return (
         <div>
-            <p>
-                {optionName}
-            </p>
+            <p>{optionName}</p>
         </div>
-    )
+    );
 }
 
-export default Option
+export default Option;
