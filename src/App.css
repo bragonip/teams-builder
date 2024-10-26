@@ -9,9 +9,6 @@ html, body {
     height: 100%;
     overflow: hidden;
     font-size: 18px;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
 }
 
 .app {
@@ -19,6 +16,7 @@ html, body {
     justify-content: center;
     align-items: center;
     height: 100vh;
+    text-align: center;
 }
 
 .notification {
