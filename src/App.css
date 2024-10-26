@@ -1,22 +1,47 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
 .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
     background-color: #212f3d;
 }
+
 .notification {
     background-color: #b03a2e;
     color: whitesmoke;
     width: 100%;
-    height: 5%;
+    height: 5vh; /* Altura relativa a la ventana */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .content {
     color: whitesmoke;
-    height: 80%;
+    height: 80vh; /* Altura relativa a la ventana */
     width: 100%;
+    overflow-y: auto;
+    padding: 10px;
 }
 
 .options {
     background-color: #1e8449;
     color: whitesmoke;
     width: 100%;
-    height: 15%;
+    height: 15vh; /* Altura relativa a la ventana */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
