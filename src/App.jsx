@@ -11,7 +11,12 @@ const App = () => {
         <>
             <div className='app'>
                 <div className='notifacation'>
-                    <p>mensaje</p>
+                    <p>mensaje: aca van a ir todas las notificaciones que hagan falta</p>
+                </div>
+                <div className='content'>
+                    <p>
+                        jugadores o equipos
+                    </p>
                 </div>
                 <div className='options'>
                     <p>
@@ -20,15 +25,8 @@ const App = () => {
                     <p>
                         exportar jugadores
                     </p>
-                </div>
-                <div className='content'>
                     <p>
-                        jugadores o equipos
-                    </p>
-                </div>
-                <div>
-                    <p>
-                        crear equipos
+                        armar equipos
                     </p>
                 </div>
             </div>
