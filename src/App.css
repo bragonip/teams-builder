@@ -5,17 +5,16 @@
 }
 
 html, body {
-    width: 95vw;
-    height: 95vh;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
     font-size: 18px;
-    align-items: center;
 }
 
 .app {
     display: flex;
     flex-direction: column;
-    height: 95vh;
+    height: 100vh;
     text-align: center;
     background-color: #212f3d;
 }
@@ -26,12 +25,13 @@ html, body {
     height: 5vh;
     display: flex;
     align-items: center;
+    justify-content: center;
     font-size: 2vh;
 }
 
 .content {
     color: whitesmoke;
-    height: 75vh;
+    height: 80vh;
     display: flex;
     align-items: center;
     justify-content: center;
