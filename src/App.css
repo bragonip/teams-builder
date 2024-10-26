@@ -1,18 +1,21 @@
 .notification {
-    background-color: #e74c3c;
-    color: #f7dc6f;
+    background-color: #b03a2e;
+    color: whitesmoke;
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     padding: 10px;
-    text-align: center;
-    z-index: 1000;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .content {
-    background-color: #f7dc6f;
-    color: black;
+    background-color: #212f3d;
+    color: whitesmoke;
+    height: 100%;
+    width: 100%;
     padding: 20px;
     margin-top: 50px; /* Ajuste para no superponerse con .notification */
     margin-bottom: 50px; /* Ajuste para no superponerse con .options */

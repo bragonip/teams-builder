@@ -19,12 +19,14 @@ const App = () => {
                     </p>
                 </div>
                 <div className='options'>
-                    <p>
-                        importar jugadores
-                    </p>
-                    <p>
-                        exportar jugadores
-                    </p>
+                    <div className=''>
+                        <p>
+                            importar jugadores
+                        </p>
+                        <p>
+                            exportar jugadores
+                        </p>
+                    </div>
                     <p>
                         armar equipos
                     </p>
