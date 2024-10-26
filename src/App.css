@@ -8,22 +8,20 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    font-size: 18px; /* Tamaño de letra base */
-}
-
-.app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+    font-size: 18px;
     text-align: center;
     align-items: center;
     justify-content: center;
 }
 
+.app {
+    display: flex;
+    height: 100vh;
+}
+
 .notification {
-    background-color: #441b1b;
+    background-color: #0f1415;
     color: whitesmoke;
-    width: 100%;
     height: 5vh;
     display: flex;
     font-size: 1.5vh; /* Tamaño de letra en .notification */
@@ -32,17 +30,14 @@ html, body {
 .content {
     color: whitesmoke;
     height: 80vh;
-    width: 100%;
     overflow-y: auto;
-    padding: 10px;
     font-size: 2vh; /* Tamaño de letra en .content */
-    background-color: #1b4426;
+    background-color: #212c2e;
 }
 
 .options {
-    background-color: #1b4437;
+    background-color: #506a6f;
     color: whitesmoke;
-    width: 100%;
     height: 15vh;
     display: flex;
     flex-direction: column; /* Coloca los elementos uno debajo del otro */
@@ -51,5 +46,5 @@ html, body {
 }
 
 .csv_handler {
-    display: inline;
+    display: inline-block;
 }
