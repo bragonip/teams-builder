@@ -5,10 +5,12 @@
 }
 
 html, body {
-    width: 95%;
-    height: 95%;
+    width: 95vw;
+    height: 95vh;
     overflow: hidden;
     font-size: 18px;
+    align-items: center;
+    justify-content: center;
 }
 
 .app {
@@ -31,7 +33,7 @@ html, body {
 
 .content {
     color: whitesmoke;
-    height: 80vh;
+    height: 75vh;
     display: flex;
     align-items: center;
     justify-content: center;
