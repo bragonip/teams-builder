@@ -12,7 +12,7 @@ const App = () => {
             <div className='app'>
                 <div className='notification'>
                     <p>
-                        No hay jugadores cargados.
+                        No hay jugadores cargados
                     </p>
                 </div>
                 <div className='content'>

@@ -53,5 +53,10 @@ html, body {
 }
 
 .csv_handler {
-    display: inline-block;
+    display: flex;
+    flex-direction: row; /* Alinea los elementos de forma horizontal */
+    gap: 10px; /* Espaciado opcional entre elementos */
+    justify-content: center; /* Centra horizontalmente si es necesario */
+    align-items: center; /* Centra verticalmente si es necesario */
 }
+
