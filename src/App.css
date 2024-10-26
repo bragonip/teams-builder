@@ -10,7 +10,6 @@ html, body {
     overflow: hidden;
     font-size: 18px;
     align-items: center;
-    justify-content: center;
 }
 
 .app {
@@ -27,7 +26,6 @@ html, body {
     height: 5vh;
     display: flex;
     align-items: center;
-    justify-content: center;
     font-size: 2vh;
 }
 
