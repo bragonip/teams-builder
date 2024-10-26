@@ -6,6 +6,16 @@ import { useState, useEffect } from 'react'
 const App = () => {
 
     //const [currentView, setcurrentView] = useState(0)
+    // Función para ajustar la altura
+    function setAppHeight() {
+        const app = document.querySelector('.app');
+        app.style.height = `${window.innerHeight}px`;
+    }
+    
+    // Llamamos a la función al cargar la página y cuando la ventana cambia de tamaño
+    window.addEventListener('load', setAppHeight);
+    window.addEventListener('resize', setAppHeight);
+    
     
     return (
         <>
