@@ -8,6 +8,7 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    font-size: 18px; /* Tamaño de letra base */
 }
 
 .app {
@@ -21,27 +22,32 @@ html, body {
     background-color: #b03a2e;
     color: whitesmoke;
     width: 100%;
-    height: 5vh; /* Altura relativa a la ventana */
+    height: 5vh;
     text-align: center;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 1.2em; /* Tamaño de letra en .notification */
 }
 
 .content {
     color: whitesmoke;
-    height: 80vh; /* Altura relativa a la ventana */
+    height: 80vh;
     width: 100%;
     overflow-y: auto;
     padding: 10px;
+    font-size: 1.2em; /* Tamaño de letra en .content */
 }
 
 .options {
     background-color: #1e8449;
     color: whitesmoke;
     width: 100%;
-    height: 15vh; /* Altura relativa a la ventana */
+    height: 15vh;
     display: flex;
+    flex-direction: column; /* Coloca los elementos uno debajo del otro */
     align-items: center;
     justify-content: center;
+    font-size: 1.2em; /* Tamaño de letra en .options */
+    gap: 5px; /* Espaciado entre elementos */
 }
