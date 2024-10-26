@@ -21,7 +21,7 @@ const App = () => {
                     </p>
                 </div>
                 <div className='options'>
-                    <div className=''>
+                    <div className='csv_handler'>
                         <p>
                             importar jugadores
                         </p>
