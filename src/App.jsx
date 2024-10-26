@@ -1,31 +1,39 @@
-import { useState } from 'react'
 import './App.css'
 import Option from './components/Option'
+import options from './data/options'
+import { useState, useEffect } from 'react'
 
-function App() {
-  const [count, setCount] = useState(0)
-  const options = ["Importar Jugadores","Exportar Jugadores"]
+const App = () => {
 
-  return (
-    <>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-      <div>
-        {options.map((option, index) => (
-          <Option key={index} optionName={option}/>
-        ))}
-      </div>
-    </>
-  )
+    //const [currentView, setcurrentView] = useState(0)
+    
+    return (
+        <>
+            <div className='app'>
+                <div className='notifacation'>
+                    <p>mensaje</p>
+                </div>
+                <div className='options'>
+                    <p>
+                        importar jugadores
+                    </p>
+                    <p>
+                        exportar jugadores
+                    </p>
+                </div>
+                <div className='content'>
+                    <p>
+                        jugadores o equipos
+                    </p>
+                </div>
+                <div>
+                    <p>
+                        crear equipos
+                    </p>
+                </div>
+            </div>
+        </>
+    )
 }
 
 export default App

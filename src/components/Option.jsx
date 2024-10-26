@@ -1,16 +1,20 @@
 import PropTypes from 'prop-types';
 
-const Option = ({ optionName }) => {
+const Option = ({optionName,action }) => {
+
     return (
         <div>
-            <p>{optionName}</p>
+            <button onClick={action}>
+                {optionName}
+            </button>
         </div>
-    );
+    )
 }
 
 // Definición de los tipos de props que espera el componente
 Option.propTypes = {
-    optionName: PropTypes.string.isRequired, // optionName debe ser una string y es requerido
+    optionName: PropTypes.string.isRequired,
+    action: PropTypes.func.isRequired,
 };
 
 export default Option;
