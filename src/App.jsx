@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 const App = () => {
     // Función para ajustar la altura
-    function setAppHeight() {
+    const setAppHeight = () => {
         const app = document.querySelector('.app');
         app.style.height = `${window.innerHeight}px`;
     }
