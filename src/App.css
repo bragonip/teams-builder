@@ -16,6 +16,8 @@ html, body {
 
 .app {
     display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh;
 }
 
@@ -24,7 +26,7 @@ html, body {
     color: whitesmoke;
     height: 5vh;
     display: flex;
-    font-size: 1.5vh; /* Tamaño de letra en .notification */
+    font-size: 2vh;
 }
 
 .content {

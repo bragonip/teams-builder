@@ -12,7 +12,7 @@ const App = () => {
             <div className='app'>
                 <div className='notification'>
                     <p>
-                        mensaje: aca van a ir todas las notificaciones que hagan falta
+                        No hay jugadores cargados.
                     </p>
                 </div>
                 <div className='content'>
