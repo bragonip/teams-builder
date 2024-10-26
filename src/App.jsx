@@ -11,7 +11,9 @@ const App = () => {
         <>
             <div className='app'>
                 <div className='notification'>
-                    <p>mensaje: aca van a ir todas las notificaciones que hagan falta</p>
+                    <p>
+                        mensaje: aca van a ir todas las notificaciones que hagan falta
+                    </p>
                 </div>
                 <div className='content'>
                     <p>
