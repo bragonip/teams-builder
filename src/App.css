@@ -15,18 +15,17 @@ html, body {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #212f3d;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
 }
 
 .notification {
-    background-color: #b03a2e;
+    background-color: #441b1b;
     color: whitesmoke;
     width: 100%;
     height: 5vh;
-    text-align: center;
     display: flex;
-    align-items: center;
-    justify-content: center;
     font-size: 1.5vh; /* Tamaño de letra en .notification */
 }
 
@@ -37,17 +36,16 @@ html, body {
     overflow-y: auto;
     padding: 10px;
     font-size: 2vh; /* Tamaño de letra en .content */
+    background-color: #1b4426;
 }
 
 .options {
-    background-color: #1e8449;
+    background-color: #1b4437;
     color: whitesmoke;
     width: 100%;
     height: 15vh;
     display: flex;
     flex-direction: column; /* Coloca los elementos uno debajo del otro */
-    align-items: center;
-    justify-content: center;
     font-size: 1.5vh; /* Tamaño de letra en .options */
     gap: 5px; /* Espaciado entre elementos */
 }
