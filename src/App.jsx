@@ -1,22 +1,26 @@
-import './App.css'
-import Option from './components/Option'
-import options from './data/options'
-import { useState, useEffect } from 'react'
+import './App.css';
+import Option from './components/Option';
+import options from './data/options';
+import { useEffect } from 'react';
 
 const App = () => {
-
-    //const [currentView, setcurrentView] = useState(0)
     // Función para ajustar la altura
     function setAppHeight() {
         const app = document.querySelector('.app');
         app.style.height = `${window.innerHeight}px`;
     }
-    
-    // Llamamos a la función al cargar la página y cuando la ventana cambia de tamaño
-    window.addEventListener('load', setAppHeight);
-    window.addEventListener('resize', setAppHeight);
-    
-    
+
+    useEffect(() => {
+        // Ajusta la altura inicial
+        setAppHeight();
+        
+        // Añade los listeners para ajustar la altura al redimensionar
+        window.addEventListener('resize', setAppHeight);
+        
+        // Limpia los listeners al desmontar el componente
+        return () => window.removeEventListener('resize', setAppHeight);
+    }, []);
+
     return (
         <>
             <div className='app'>
@@ -45,7 +49,7 @@ const App = () => {
                 </div>
             </div>
         </>
-    )
-}
+    );
+};
 
-export default App
+export default App;
