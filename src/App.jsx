@@ -41,7 +41,7 @@ const App = () => {
                     {players.length === 0 ? (
                         <p>No hay jugadores cargados</p>
                     ) : (
-                        <p>{players.length} jugadores cargados</p>
+                        <p>{players.length} jugadores cargados - 0 seleccionados</p>
                     )}
                 </div>
                 <div className='content'>
