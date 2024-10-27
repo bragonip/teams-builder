@@ -58,20 +58,13 @@ const App = () => {
                     <p>jugadores o equipos</p>
                     <ul>
                         {players.map((player, index) => (
-                            <li key={index}>{player.nombre} - {player.posición}</li>
+                            <li key={index}>{player.jugador}</li>
                         ))}
                     </ul>
                 </div>
                 <div className='options'>
                     <div className='csv_handler'>
-                        <input
-                            type="file"
-                            accept=".csv"
-                            onChange={handleFileSelection}
-                            style={{ display: 'none' }}
-                            id="fileInput"
-                        />
-                        <button onClick={() => document.getElementById('fileInput').click()}>
+                        <button onClick={handleFileSelection}>
                             Seleccionar archivo CSV
                         </button>
                         <button onClick={importPlayers}>
