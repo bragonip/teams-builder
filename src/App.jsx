@@ -4,6 +4,7 @@ import Papa from 'papaparse';
 
 const App = () => {
     const [players, setPlayers] = useState([]); // Lista temporal de jugadores
+    const [selectedPlayers, setselectedPlayers] = useState([]); // Lista temporal de jugadores
 
     const setAppHeight = () => {
         const app = document.querySelector('.app');
@@ -41,7 +42,7 @@ const App = () => {
                     {players.length === 0 ? (
                         <p>No hay jugadores cargados</p>
                     ) : (
-                        <p>{players.length} jugadores cargados - 0 seleccionados</p>
+                        <p>{players.length} jugadores cargados - {players.length} seleccionados</p>
                     )}
                 </div>
                 <div className='content'>
