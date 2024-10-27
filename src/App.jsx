@@ -1,7 +1,7 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
-import { RiTeamFill, RiFileUploadLine } from "react-icons/ri";
+import { RiTeamFill, RiFileUploadLine, RiFileCopyLine } from "react-icons/ri";
 
 const App = () => {
     const [players, setPlayers] = useState([]); // Lista temporal de jugadores
@@ -28,6 +28,20 @@ const App = () => {
                 console.error("Error al parsear el archivo CSV:", error);
             }
         });
+    };
+
+    // Función para copiar los jugadores al portapapeles
+    const copyPlayersToClipboard = () => {
+        // Convertimos los jugadores a JSON para copiar al portapapeles
+        const playerText = players.map(player => player.Jugador).join('\n');
+
+        navigator.clipboard.writeText(playerText)
+            .then(() => {
+                alert("Lista de jugadores copiada al portapapeles!");
+            })
+            .catch((error) => {
+                console.error("Error al copiar los jugadores:", error);
+            });
     };
 
     useEffect(() => {
@@ -69,10 +83,9 @@ const App = () => {
                         <RiTeamFill />
                         <p>Armar equipos</p>
                     </div>
-                    <div>
-                        <p>
-                            exportar equipos
-                        </p>
+                    <div onClick={copyPlayersToClipboard} style={{ cursor: 'pointer', color: 'whitesmoke' }}>
+                        <RiFileCopyLine />
+                        <p>Copiar jugadores</p>
                     </div>
                 </div>
             </div>
