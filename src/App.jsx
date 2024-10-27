@@ -1,6 +1,4 @@
 import './App.css';
-import Option from './components/Option';
-import options from './data/options';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 
@@ -47,11 +45,9 @@ const App = () => {
                     )}
                 </div>
                 <div className='content'>
-                    <ul>
-                        {players.map((player, index) => (
-                            <p key={index}>{player.Jugador}</p>
-                        ))}
-                    </ul>
+                    {players.map((player, index) => (
+                        <p key={index}>{player.Jugador}</p>
+                    ))}
                 </div>
                 <div className='options'>
                     <div className='csv_handler'>
