@@ -1,23 +1,45 @@
 import './App.css';
 import Option from './components/Option';
 import options from './data/options';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import Papa from 'papaparse';
 
 const App = () => {
-    // Función para ajustar la altura
+    const fileInputRef = useRef(null); // Referencia para el input de archivo
+
     const setAppHeight = () => {
         const app = document.querySelector('.app');
         app.style.height = `${window.innerHeight}px`;
-    }
+    };
+
+    const handleFileSelection = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            fileInputRef.current = file; // Guarda la referencia del archivo cargado
+        }
+    };
+
+    const importPlayers = () => {
+        const file = fileInputRef.current;
+        if (!file) return;
+    
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+                const players = results.data;
+                console.log(players); // Aquí ves la lista de jugadores importados
+                // Puedes manejar la lista de jugadores aquí, como actualizar el estado
+            },
+            error: (error) => {
+                console.error("Error al parsear el archivo CSV:", error);
+            }
+        });
+    };
 
     useEffect(() => {
-        // Ajusta la altura inicial
         setAppHeight();
-        
-        // Añade los listeners para ajustar la altura al redimensionar
         window.addEventListener('resize', setAppHeight);
-        
-        // Limpia los listeners al desmontar el componente
         return () => window.removeEventListener('resize', setAppHeight);
     }, []);
 
@@ -36,16 +58,21 @@ const App = () => {
                 </div>
                 <div className='options'>
                     <div className='csv_handler'>
-                        <p>
-                            importar jugadores
-                        </p>
-                        <p>
-                            exportar jugadores
-                        </p>
+                        <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileSelection}
+                            style={{ display: 'none' }}
+                            id="fileInput"
+                        />
+                        <button onClick={() => document.getElementById('fileInput').click()}>
+                            Seleccionar archivo CSV
+                        </button>
+                        <button onClick={importPlayers}>
+                            Importar jugadores
+                        </button>
                     </div>
-                    <p>
-                        armar equipos
-                    </p>
+                    <p>armar equipos</p>
                 </div>
             </div>
         </>
