@@ -41,6 +41,7 @@ html, body {
     overflow-y: auto;
     font-size: 2vh;
     background-color: #212c2e;
+    flex-direction: column;
 }
 
 .options {
