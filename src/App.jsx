@@ -64,7 +64,7 @@ const App = () => {
                         <label htmlFor="fileInput" style={{ cursor: 'pointer', color: 'whitesmoke' }}>
                             Importar jugadores
                         </label>
-                        <RiTeamFill />
+                        <RiFileUploadLine />
                     </div>
                     <div>
                         <RiTeamFill />
