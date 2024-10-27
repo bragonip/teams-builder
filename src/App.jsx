@@ -1,7 +1,7 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
-import { RiTeamFill } from "react-icons/ri";
+import { RiTeamFill, RiFileUploadLine } from "react-icons/ri";
 
 const App = () => {
     const [players, setPlayers] = useState([]); // Lista temporal de jugadores
@@ -43,9 +43,10 @@ const App = () => {
                     {players.length === 0 ? (
                         <p>No hay jugadores cargados</p>
                     ) : (
-                        <p>{players.length} jugadores cargados - {players.length} seleccionados</p>
+                        <p>{players.length} jugadores cargados - {selectedPlayers.length} seleccionados</p>
                     )}
                 </div>
+                <RiFileUploadLine />
                 <div className='content'>
                     {players.map((player, index) => (
                         <p key={index}>{player.Jugador}</p>
@@ -66,6 +67,7 @@ const App = () => {
                         <RiTeamFill />
                     </div>
                     <p>Armar equipos</p>
+                    <RiTeamFill />
                 </div>
             </div>
         </>
