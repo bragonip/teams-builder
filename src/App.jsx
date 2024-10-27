@@ -66,8 +66,15 @@ const App = () => {
                         </label>
                         <RiTeamFill />
                     </div>
-                    <p>Armar equipos</p>
-                    <RiTeamFill />
+                    <div>
+                        <RiTeamFill />
+                        <p>Armar equipos</p>
+                    </div>
+                    <div>
+                        <p>
+                            exportar equipos
+                        </p>
+                    </div>
                 </div>
             </div>
         </>
