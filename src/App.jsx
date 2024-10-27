@@ -1,11 +1,10 @@
 import './App.css';
 import Option from './components/Option';
 import options from './data/options';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
 
 const App = () => {
-    const fileInputRef = useRef(null); // Referencia para el input de archivo
     const [players, setPlayers] = useState([]); // Lista temporal de jugadores
 
     const setAppHeight = () => {
@@ -13,24 +12,17 @@ const App = () => {
         app.style.height = `${window.innerHeight}px`;
     };
 
-    const handleFileSelection = (event) => {
+    const handleFileImport = (event) => {
         const file = event.target.files[0];
-        if (file) {
-            fileInputRef.current = file; // Guarda la referencia del archivo cargado
-        }
-    };
-
-    const importPlayers = () => {
-        const file = fileInputRef.current;
         if (!file) return;
-    
+
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
             complete: (results) => {
                 const importedPlayers = results.data;
                 setPlayers(importedPlayers); // Actualiza la lista de jugadores en el estado
-                console.log("Jugadores importados:", importedPlayers); // Muestra los jugadores en la consola
+                console.log("Jugadores importados:", importedPlayers);
             },
             error: (error) => {
                 console.error("Error al parsear el archivo CSV:", error);
@@ -55,10 +47,10 @@ const App = () => {
                     )}
                 </div>
                 <div className='content'>
-                    <p>jugadores o equipos</p>
+                    <p>Jugadores o equipos</p>
                     <ul>
                         {players.map((player, index) => (
-                            <li key={index}>{player.jugador}</li>
+                            <li key={index}>{player.nombre} - {player.posición}</li>
                         ))}
                     </ul>
                 </div>
@@ -67,18 +59,15 @@ const App = () => {
                         <input
                             type="file"
                             accept=".csv"
-                            onChange={handleFileSelection}
+                            onChange={handleFileImport} // Ejecuta la importación al seleccionar el archivo
                             style={{ display: 'none' }}
                             id="fileInput"
                         />
-                        <button onClick={() => document.getElementById('fileInput').click()}>
-                            Seleccionar archivo CSV
-                        </button>
-                        <button onClick={importPlayers}>
+                        <label htmlFor="fileInput" style={{ cursor: 'pointer', color: 'whitesmoke' }}>
                             Importar jugadores
-                        </button>
+                        </label>
                     </div>
-                    <p>armar equipos</p>
+                    <p>Armar equipos</p>
                 </div>
             </div>
         </>
