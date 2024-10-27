@@ -46,7 +46,6 @@ const App = () => {
                         <p>{players.length} jugadores cargados - {selectedPlayers.length} seleccionados</p>
                     )}
                 </div>
-                <RiFileUploadLine />
                 <div className='content'>
                     {players.map((player, index) => (
                         <p key={index}>{player.Jugador}</p>
