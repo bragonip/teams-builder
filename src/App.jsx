@@ -64,6 +64,13 @@ const App = () => {
                 </div>
                 <div className='options'>
                     <div className='csv_handler'>
+                        <input
+                            type="file"
+                            accept=".csv"
+                            onChange={handleFileSelection}
+                            style={{ display: 'none' }}
+                            id="fileInput"
+                        />
                         <button onClick={handleFileSelection}>
                             Seleccionar archivo CSV
                         </button>
