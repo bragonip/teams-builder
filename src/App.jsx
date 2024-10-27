@@ -47,10 +47,9 @@ const App = () => {
                     )}
                 </div>
                 <div className='content'>
-                    <p>Jugadores o equipos</p>
                     <ul>
                         {players.map((player, index) => (
-                            <li key={index}>{player.Jugador}</li>
+                            <p key={index}>{player.Jugador}</p>
                         ))}
                     </ul>
                 </div>
