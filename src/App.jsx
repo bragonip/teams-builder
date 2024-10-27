@@ -50,7 +50,7 @@ const App = () => {
                     <p>Jugadores o equipos</p>
                     <ul>
                         {players.map((player, index) => (
-                            <li key={index}>{player.nombre} - {player.posición}</li>
+                            <li key={index}>{player.Jugador}</li>
                         ))}
                     </ul>
                 </div>
