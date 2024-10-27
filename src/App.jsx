@@ -36,12 +36,6 @@ const App = () => {
         const playerText = players.map(player => player.Jugador).join('\n');
 
         navigator.clipboard.writeText(playerText)
-            .then(() => {
-                alert("Lista de jugadores copiada al portapapeles!");
-            })
-            .catch((error) => {
-                console.error("Error al copiar los jugadores:", error);
-            });
     };
 
     useEffect(() => {
