@@ -1,6 +1,7 @@
 import './App.css';
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
+import { RiTeamFill } from "react-icons/ri";
 
 const App = () => {
     const [players, setPlayers] = useState([]); // Lista temporal de jugadores
@@ -62,6 +63,7 @@ const App = () => {
                         <label htmlFor="fileInput" style={{ cursor: 'pointer', color: 'whitesmoke' }}>
                             Importar jugadores
                         </label>
+                        <RiTeamFill />
                     </div>
                     <p>Armar equipos</p>
                 </div>
