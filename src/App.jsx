@@ -71,7 +71,7 @@ const App = () => {
                             style={{ display: 'none' }}
                             id="fileInput"
                         />
-                        <button onClick={handleFileSelection}>
+                        <button onClick={() => document.getElementById('fileInput').click()}>
                             Seleccionar archivo CSV
                         </button>
                         <button onClick={importPlayers}>
