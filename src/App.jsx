@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, Users } from 'lucide-react';
+import { Upload, Users, Check } from 'lucide-react';
 import Papa from 'papaparse';
 import './App.css';
 
 const App = () => {
-    const [players, setPlayers] = useState([]);
+    const [allPlayers, setAllPlayers] = useState([]);
+    const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [skillImportance, setSkillImportance] = useState({});
     const [teams, setTeams] = useState({ team1: [], team2: [] });
     const [error, setError] = useState(null);
@@ -22,15 +23,14 @@ const App = () => {
             header: true,
             skipEmptyLines: true,
             complete: (results) => {
-                if (results.data.length === 0) {
-                    setError("El archivo CSV está vacío");
+                if (results.data.length <= 1) {
+                    setError("El archivo CSV está vacío o no tiene jugadores");
                     return;
                 }
                 
                 const columns = Object.keys(results.data[0]);
                 const playerColumns = columns.filter(col => col !== 'Jugador');
                 
-                // First row contains importance values
                 const importanceValues = results.data[0];
                 const importance = {};
                 playerColumns.forEach(col => {
@@ -38,9 +38,8 @@ const App = () => {
                 });
                 setSkillImportance(importance);
 
-                // Remove first row (importance) and set players
                 const actualPlayers = results.data.slice(1);
-                setPlayers(actualPlayers);
+                setAllPlayers(actualPlayers);
                 setError(null);
             },
             error: (error) => {
@@ -50,14 +49,22 @@ const App = () => {
         });
     };
 
+    const togglePlayerSelection = (player) => {
+        setSelectedPlayers(prev => 
+            prev.includes(player)
+                ? prev.filter(p => p !== player)
+                : [...prev, player]
+        );
+    };
+
     const createTeams = () => {
-        if (players.length === 0) {
-            setError("No hay jugadores para distribuir");
+        if (selectedPlayers.length < 2) {
+            setError("Selecciona al menos 2 jugadores");
             return;
         }
 
         const skillColumns = Object.keys(skillImportance);
-        const sortedPlayers = [...players].sort((a, b) => {
+        const sortedPlayers = [...selectedPlayers].sort((a, b) => {
             const calculatePlayerScore = (player) => {
                 return skillColumns.reduce((score, col) => {
                     const skillImportanceValue = skillImportance[col];
@@ -102,12 +109,39 @@ const App = () => {
         <div className='app'>
             <div className='notification'>
                 {error && <p style={{color: 'red'}}>{error}</p>}
-                {players.length > 0 && !error && (
-                    <p>{players.length} jugadores cargados</p>
+                {allPlayers.length > 0 && (
+                    <p>{allPlayers.length} jugadores en lista</p>
+                )}
+                {selectedPlayers.length > 0 && (
+                    <p>{selectedPlayers.length} jugadores seleccionados para el partido</p>
                 )}
             </div>
             
             <div className='content'>
+                {allPlayers.length > 0 && (
+                    <div>
+                        <h3>Seleccionar Jugadores</h3>
+                        {allPlayers.map((player, index) => (
+                            <div 
+                                key={index} 
+                                onClick={() => togglePlayerSelection(player)}
+                                style={{
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    cursor: 'pointer',
+                                    backgroundColor: selectedPlayers.includes(player) ? '#4CAF50' : 'transparent',
+                                    color: selectedPlayers.includes(player) ? 'white' : 'black',
+                                    padding: '5px',
+                                    margin: '2px 0'
+                                }}
+                            >
+                                {selectedPlayers.includes(player) && <Check size={20} />}
+                                {player.Jugador}
+                            </div>
+                        ))}
+                    </div>
+                )}
+
                 {teams.team1.length > 0 && (
                     <div>
                         <h3>Equipo 1</h3>
