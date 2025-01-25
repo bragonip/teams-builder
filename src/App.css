@@ -1,3 +1,12 @@
+:root {
+    --bg-dark: #212f3d;
+    --bg-darker: #0f1415;
+    --bg-content: #212c2e;
+    --bg-options: #506a6f;
+    --text-light: whitesmoke;
+    --transition-speed: 0.3s;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -8,59 +17,84 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    font-size: 18px;
-    font-family: "Ubuntu", sans-serif;
-    font-weight: 400;
-    font-style: normal;
+    font-size: 16px;
+    font-family: "Ubuntu", "Segoe UI", Roboto, sans-serif;
+    line-height: 1.6;
 }
 
 .app {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    text-align: center;
-    background-color: #212f3d;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 0 20px rgba(0,0,0,0.2);
 }
 
 .notification {
-    background-color: #0f1415;
-    color: whitesmoke;
-    height: 5vh;
+    background-color: var(--bg-darker);
+    color: var(--text-light);
+    padding: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2vh;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
 }
 
 .content {
-    color: whitesmoke;
-    height: 80vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    color: var(--text-light);
+    flex-grow: 1;
     overflow-y: auto;
-    font-size: 2vh;
-    background-color: #212c2e;
+    background-color: var(--bg-content);
+    padding: 20px;
+    display: flex;
     flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.3) transparent;
+}
+
+.content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.content::-webkit-scrollbar-thumb {
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 4px;
 }
 
 .options {
-    background-color: #506a6f;
-    color: whitesmoke;
-    height: 15vh;
+    background-color: var(--bg-options);
+    color: var(--text-light);
     display: flex;
-    flex-direction: row;
-    align-items: center;
     justify-content: center;
-    font-size: 1.5vh;
-    gap: 5px;
+    align-items: center;
+    gap: 20px;
+    padding: 15px;
+    transition: background-color var(--transition-speed);
 }
 
 .csv_handler {
     display: flex;
-    flex-direction: row; /* Alinea los elementos de forma horizontal */
-    gap: 10px; /* Espaciado opcional entre elementos */
-    justify-content: center; /* Centra horizontalmente si es necesario */
-    align-items: center; /* Centra verticalmente si es necesario */
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: opacity var(--transition-speed);
 }
 
+.csv_handler:hover {
+    opacity: 0.8;
+}
+
+@media (max-width: 480px) {
+    .app {
+        width: 100%;
+        max-width: 100%;
+    }
+    
+    .options {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
