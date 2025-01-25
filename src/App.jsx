@@ -26,8 +26,16 @@ const App = () => {
                     return;
                 }
                 
-                // Validate required columns
-                const requiredColumns = ['Jugador', 'Habilidad'];
+                const requiredColumns = [
+                    'Jugador', 
+                    'Al Arco', 
+                    'Defensa', 
+                    'Estado Fisico', 
+                    'Pase', 
+                    'Idea de Juego', 
+                    'Gol'
+                ];
+                
                 const columns = Object.keys(results.data[0]);
                 const missingColumns = requiredColumns.filter(col => !columns.includes(col));
                 
@@ -36,11 +44,16 @@ const App = () => {
                     return;
                 }
 
-                // Ensure Habilidad is numeric
-                const validatedPlayers = results.data.map(player => ({
-                    ...player,
-                    Habilidad: parseFloat(player.Habilidad) || 0
-                }));
+                const validatedPlayers = results.data.map(player => {
+                    const skillColumns = requiredColumns.slice(1);
+                    const averageSkill = skillColumns.reduce((sum, col) => 
+                        sum + (parseFloat(player[col]) || 0), 0) / skillColumns.length;
+
+                    return {
+                        ...player,
+                        AverageSkill: averageSkill
+                    };
+                });
 
                 setPlayers(validatedPlayers);
                 setError(null);
@@ -58,10 +71,8 @@ const App = () => {
             return;
         }
 
-        // Sort players by skill in descending order
-        const sortedPlayers = [...players].sort((a, b) => b.Habilidad - a.Habilidad);
+        const sortedPlayers = [...players].sort((a, b) => b.AverageSkill - a.AverageSkill);
 
-        // Snake draft algorithm
         const team1 = [];
         const team2 = [];
         
@@ -73,16 +84,50 @@ const App = () => {
             }
         });
 
-        setTeams({ team1, team2 });
+        // Recalculate team average skills
+        const calculateTeamSkills = (team) => {
+            const skillColumns = [
+                'Al Arco', 
+                'Defensa', 
+                'Estado Fisico', 
+                'Pase', 
+                'Idea de Juego', 
+                'Gol'
+            ];
+
+            const teamSkills = skillColumns.reduce((acc, skill) => {
+                acc[skill] = team.reduce((sum, player) => sum + parseFloat(player[skill]), 0) / team.length;
+                return acc;
+            }, {});
+
+            return teamSkills;
+        };
+
+        const team1Skills = calculateTeamSkills(team1);
+        const team2Skills = calculateTeamSkills(team2);
+
+        setTeams({ 
+            team1, 
+            team2, 
+            team1Skills, 
+            team2Skills 
+        });
     };
 
     const copyPlayersToClipboard = (teamKey) => {
-        const teamPlayers = teams[teamKey].map(player => 
-            `${player.Jugador} (Habilidad: ${player.Habilidad})`
+        const team = teams[teamKey];
+        const teamSkills = teams[`${teamKey}Skills`];
+        
+        const teamDetails = team.map(player => 
+            `${player.Jugador} - Promedio: ${player.AverageSkill.toFixed(2)}`
         ).join('\n');
 
-        navigator.clipboard.writeText(teamPlayers)
-            .then(() => alert(`Equipo ${teamKey === 'team1' ? '1' : '2'} copiado al portapapeles`))
+        const skillsDetails = Object.entries(teamSkills)
+            .map(([skill, value]) => `${skill}: ${value.toFixed(2)}`)
+            .join('\n');
+
+        navigator.clipboard.writeText(`Equipo:\n${teamDetails}\n\nPromedios por Habilidad:\n${skillsDetails}`)
+            .then(() => alert(`Equipo copiado al portapapeles`))
             .catch(err => console.error('Error al copiar:', err));
     };
 
@@ -102,21 +147,20 @@ const App = () => {
             </div>
             
             <div className='content'>
-                {players.length > 0 && (
-                    <div>
-                        <h3>Jugadores originales:</h3>
-                        {players.map((player, index) => (
-                            <p key={index}>{player.Jugador} - Habilidad: {player.Habilidad}</p>
-                        ))}
-                    </div>
-                )}
-                
                 {teams.team1.length > 0 && (
                     <div>
-                        <h3>Equipo 1:</h3>
+                        <h3>Equipo 1 (Promedio: {teams.team1Skills ? Object.values(teams.team1Skills).reduce((a,b) => a+b, 0).toFixed(2) : '0'})</h3>
                         {teams.team1.map((player, index) => (
-                            <p key={index}>{player.Jugador} - Habilidad: {player.Habilidad}</p>
+                            <p key={index}>
+                                {player.Jugador} (Promedio: {player.AverageSkill.toFixed(2)})
+                            </p>
                         ))}
+                        <div>
+                            <h4>Promedios por Habilidad:</h4>
+                            {teams.team1Skills && Object.entries(teams.team1Skills).map(([skill, value]) => (
+                                <p key={skill}>{skill}: {value.toFixed(2)}</p>
+                            ))}
+                        </div>
                         <button onClick={() => copyPlayersToClipboard('team1')}>
                             Copiar Equipo 1
                         </button>
@@ -125,10 +169,18 @@ const App = () => {
                 
                 {teams.team2.length > 0 && (
                     <div>
-                        <h3>Equipo 2:</h3>
+                        <h3>Equipo 2 (Promedio: {teams.team2Skills ? Object.values(teams.team2Skills).reduce((a,b) => a+b, 0).toFixed(2) : '0'})</h3>
                         {teams.team2.map((player, index) => (
-                            <p key={index}>{player.Jugador} - Habilidad: {player.Habilidad}</p>
+                            <p key={index}>
+                                {player.Jugador} (Promedio: {player.AverageSkill.toFixed(2)})
+                            </p>
                         ))}
+                        <div>
+                            <h4>Promedios por Habilidad:</h4>
+                            {teams.team2Skills && Object.entries(teams.team2Skills).map(([skill, value]) => (
+                                <p key={skill}>{skill}: {value.toFixed(2)}</p>
+                            ))}
+                        </div>
                         <button onClick={() => copyPlayersToClipboard('team2')}>
                             Copiar Equipo 2
                         </button>
