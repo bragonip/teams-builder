@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, Users, Copy } from 'lucide-react';
+import { Upload, Users } from 'lucide-react';
 import Papa from 'papaparse';
 import './App.css';
 
 const App = () => {
     const [players, setPlayers] = useState([]);
+    const [skillImportance, setSkillImportance] = useState({});
     const [teams, setTeams] = useState({ team1: [], team2: [] });
     const [error, setError] = useState(null);
 
@@ -26,36 +27,20 @@ const App = () => {
                     return;
                 }
                 
-                const requiredColumns = [
-                    'Jugador', 
-                    'Al Arco', 
-                    'Defensa', 
-                    'Estado Fisico', 
-                    'Pase', 
-                    'Idea de Juego', 
-                    'Gol'
-                ];
-                
                 const columns = Object.keys(results.data[0]);
-                const missingColumns = requiredColumns.filter(col => !columns.includes(col));
+                const playerColumns = columns.filter(col => col !== 'Jugador');
                 
-                if (missingColumns.length > 0) {
-                    setError(`Columnas faltantes: ${missingColumns.join(', ')}`);
-                    return;
-                }
-
-                const validatedPlayers = results.data.map(player => {
-                    const skillColumns = requiredColumns.slice(1);
-                    const averageSkill = skillColumns.reduce((sum, col) => 
-                        sum + (parseFloat(player[col]) || 0), 0) / skillColumns.length;
-
-                    return {
-                        ...player,
-                        AverageSkill: averageSkill
-                    };
+                // First row contains importance values
+                const importanceValues = results.data[0];
+                const importance = {};
+                playerColumns.forEach(col => {
+                    importance[col] = parseFloat(importanceValues[col]) || 1;
                 });
+                setSkillImportance(importance);
 
-                setPlayers(validatedPlayers);
+                // Remove first row (importance) and set players
+                const actualPlayers = results.data.slice(1);
+                setPlayers(actualPlayers);
                 setError(null);
             },
             error: (error) => {
@@ -71,7 +56,18 @@ const App = () => {
             return;
         }
 
-        const sortedPlayers = [...players].sort((a, b) => b.AverageSkill - a.AverageSkill);
+        const skillColumns = Object.keys(skillImportance);
+        const sortedPlayers = [...players].sort((a, b) => {
+            const calculatePlayerScore = (player) => {
+                return skillColumns.reduce((score, col) => {
+                    const skillImportanceValue = skillImportance[col];
+                    const skillValue = parseFloat(player[col] || 0);
+                    return score + (skillValue * skillImportanceValue);
+                }, 0);
+            };
+
+            return calculatePlayerScore(b) - calculatePlayerScore(a);
+        });
 
         const team1 = [];
         const team2 = [];
@@ -84,49 +80,14 @@ const App = () => {
             }
         });
 
-        // Recalculate team average skills
-        const calculateTeamSkills = (team) => {
-            const skillColumns = [
-                'Al Arco', 
-                'Defensa', 
-                'Estado Fisico', 
-                'Pase', 
-                'Idea de Juego', 
-                'Gol'
-            ];
-
-            const teamSkills = skillColumns.reduce((acc, skill) => {
-                acc[skill] = team.reduce((sum, player) => sum + parseFloat(player[skill]), 0) / team.length;
-                return acc;
-            }, {});
-
-            return teamSkills;
-        };
-
-        const team1Skills = calculateTeamSkills(team1);
-        const team2Skills = calculateTeamSkills(team2);
-
-        setTeams({ 
-            team1, 
-            team2, 
-            team1Skills, 
-            team2Skills 
-        });
+        setTeams({ team1, team2 });
     };
 
     const copyPlayersToClipboard = (teamKey) => {
         const team = teams[teamKey];
-        const teamSkills = teams[`${teamKey}Skills`];
-        
-        const teamDetails = team.map(player => 
-            `${player.Jugador} - Promedio: ${player.AverageSkill.toFixed(2)}`
-        ).join('\n');
+        const teamPlayers = team.map(player => player.Jugador).join('\n');
 
-        const skillsDetails = Object.entries(teamSkills)
-            .map(([skill, value]) => `${skill}: ${value.toFixed(2)}`)
-            .join('\n');
-
-        navigator.clipboard.writeText(`Equipo:\n${teamDetails}\n\nPromedios por Habilidad:\n${skillsDetails}`)
+        navigator.clipboard.writeText(teamPlayers)
             .then(() => alert(`Equipo copiado al portapapeles`))
             .catch(err => console.error('Error al copiar:', err));
     };
@@ -149,18 +110,10 @@ const App = () => {
             <div className='content'>
                 {teams.team1.length > 0 && (
                     <div>
-                        <h3>Equipo 1 (Promedio: {teams.team1Skills ? Object.values(teams.team1Skills).reduce((a,b) => a+b, 0).toFixed(2) : '0'})</h3>
+                        <h3>Equipo 1</h3>
                         {teams.team1.map((player, index) => (
-                            <p key={index}>
-                                {player.Jugador} (Promedio: {player.AverageSkill.toFixed(2)})
-                            </p>
+                            <p key={index}>{player.Jugador}</p>
                         ))}
-                        <div>
-                            <h4>Promedios por Habilidad:</h4>
-                            {teams.team1Skills && Object.entries(teams.team1Skills).map(([skill, value]) => (
-                                <p key={skill}>{skill}: {value.toFixed(2)}</p>
-                            ))}
-                        </div>
                         <button onClick={() => copyPlayersToClipboard('team1')}>
                             Copiar Equipo 1
                         </button>
@@ -169,18 +122,10 @@ const App = () => {
                 
                 {teams.team2.length > 0 && (
                     <div>
-                        <h3>Equipo 2 (Promedio: {teams.team2Skills ? Object.values(teams.team2Skills).reduce((a,b) => a+b, 0).toFixed(2) : '0'})</h3>
+                        <h3>Equipo 2</h3>
                         {teams.team2.map((player, index) => (
-                            <p key={index}>
-                                {player.Jugador} (Promedio: {player.AverageSkill.toFixed(2)})
-                            </p>
+                            <p key={index}>{player.Jugador}</p>
                         ))}
-                        <div>
-                            <h4>Promedios por Habilidad:</h4>
-                            {teams.team2Skills && Object.entries(teams.team2Skills).map(([skill, value]) => (
-                                <p key={skill}>{skill}: {value.toFixed(2)}</p>
-                            ))}
-                        </div>
                         <button onClick={() => copyPlayersToClipboard('team2')}>
                             Copiar Equipo 2
                         </button>
