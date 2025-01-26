@@ -76,12 +76,19 @@ const App = () => {
             calculatePlayerScore(b) - calculatePlayerScore(a)
         );
     
+        // Randomize starting point
+        const randomStartIndex = Math.floor(Math.random() * sortedPlayers.length);
+        const reorderedPlayers = [
+            ...sortedPlayers.slice(randomStartIndex),
+            ...sortedPlayers.slice(0, randomStartIndex)
+        ];
+    
         const team1 = [];
         const team2 = [];
         let team1Score = 0;
         let team2Score = 0;
     
-        for (const player of sortedPlayers) {
+        for (const player of reorderedPlayers) {
             const playerScore = calculatePlayerScore(player);
             
             if (team1Score <= team2Score) {
@@ -92,9 +99,6 @@ const App = () => {
                 team2Score += playerScore;
             }
         }
-    
-        console.log('Team 1:', team1);
-        console.log('Team 2:', team2);
     
         setTeams({ team1, team2 });
     };
