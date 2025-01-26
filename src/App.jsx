@@ -64,17 +64,17 @@ const App = () => {
         }
     
         const skillColumns = Object.keys(skillImportance);
-        const sortedPlayers = [...selectedPlayers].sort((a, b) => {
-            const calculatePlayerScore = (player) => {
-                return skillColumns.reduce((score, col) => {
-                    const skillImportanceValue = skillImportance[col];
-                    const skillValue = parseFloat(player[col] || 0);
-                    return score + (skillValue * skillImportanceValue);
-                }, 0);
-            };
+        const calculatePlayerScore = (player) => {
+            return skillColumns.reduce((score, col) => {
+                const skillImportanceValue = skillImportance[col];
+                const skillValue = parseFloat(player[col] || 0);
+                return score + (skillValue * skillImportanceValue);
+            }, 0);
+        };
     
-            return calculatePlayerScore(b) - calculatePlayerScore(a);
-        });
+        const sortedPlayers = [...selectedPlayers].sort((a, b) => 
+            calculatePlayerScore(b) - calculatePlayerScore(a)
+        );
     
         const team1 = [];
         const team2 = [];
@@ -92,6 +92,9 @@ const App = () => {
                 team2Score += playerScore;
             }
         }
+    
+        console.log('Team 1:', team1);
+        console.log('Team 2:', team2);
     
         setTeams({ team1, team2 });
     };
