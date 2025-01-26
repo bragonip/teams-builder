@@ -8,7 +8,7 @@
 }
 
 .player-item.selected {
-    background-color: #4CAF50;
+    background-color: darkolivegreen;
 }
 
 .teams-container {
@@ -27,14 +27,14 @@
 
 .file-label {
     cursor: pointer;
-    color: whitesmoke;
+    color: ;
     display: flex;
     align-items: center;
 }
 
 .create-teams-btn {
     cursor: pointer;
-    color: whitesmoke;
+    color: black;
     display: flex;
     align-items: center;
 }
@@ -46,7 +46,7 @@
 
 .copy-teams-btn {
     padding: 10px;
-    background-color: darkolivegreen;
+    background-color: darkcyan;
     color: white;
     border: none;
     border-radius: 5px;
