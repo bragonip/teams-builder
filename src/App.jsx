@@ -149,7 +149,7 @@ const App = () => {
                                     alignItems: 'center', 
                                     cursor: 'pointer',
                                     backgroundColor: selectedPlayers.includes(player) ? '#4CAF50' : 'transparent',
-                                    color: selectedPlayers.includes(player) ? 'white' : 'black',
+                                    color: selectedPlayers.includes(player) ? 'white' : 'white',
                                     padding: '5px',
                                     margin: '2px 0'
                                 }}
