@@ -57,7 +57,7 @@ const App = () => {
         );
     };
 
-    const createBalancedTeams = () => {
+    const createTeams = () => {
         if (selectedPlayers.length < 2) {
             setError("Selecciona al menos 2 jugadores");
             return;
