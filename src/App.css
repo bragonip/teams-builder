@@ -4,7 +4,7 @@
     cursor: pointer;
     padding: 5px;
     margin: 2px 0;
-    color: white;
+    color: black;
 }
 
 .player-item.selected {
@@ -46,7 +46,7 @@
 
 .copy-teams-btn {
     padding: 10px;
-    background-color: #007bff;
+    background-color: darkolivegreen;
     color: white;
     border: none;
     border-radius: 5px;
@@ -54,5 +54,5 @@
 }
 
 .error-message {
-    color: red;
+    color: darkred;
 }
