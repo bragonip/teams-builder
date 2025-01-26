@@ -127,32 +127,24 @@ const App = () => {
     return (
         <div className='app'>
             <div className='notification'>
-                {error && <p style={{color: 'red'}}>{error}</p>}
+                {error && <p className="error-message">{error}</p>}
                 {allPlayers.length > 0 && (
-                    <p>{allPlayers.length} jugadores en lista</p>
+                    <p>Jugadores en lista: {allPlayers.length}</p>
                 )}
                 {selectedPlayers.length > 0 && (
-                    <p>{selectedPlayers.length} jugadores seleccionados para el partido</p>
+                    <p>Jugadores seleccionados: {selectedPlayers.length}</p>
                 )}
             </div>
             
             <div className='content'>
                 {allPlayers.length > 0 && (
-                    <div>
+                    <div className="player-selection">
                         <h3>Seleccionar Jugadores</h3>
                         {allPlayers.map((player, index) => (
                             <div 
                                 key={index} 
                                 onClick={() => togglePlayerSelection(player)}
-                                style={{
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    cursor: 'pointer',
-                                    backgroundColor: selectedPlayers.includes(player) ? '#4CAF50' : 'transparent',
-                                    color: selectedPlayers.includes(player) ? 'white' : 'white',
-                                    padding: '5px',
-                                    margin: '2px 0'
-                                }}
+                                className={`player-item ${selectedPlayers.includes(player) ? 'selected' : ''}`}
                             >
                                 {selectedPlayers.includes(player) && <Check size={20} />}
                                 {player.Jugador}
@@ -162,15 +154,15 @@ const App = () => {
                 )}
 
                 {teams.team1.length > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
-                        <div style={{ width: '48%' }}>
+                    <div className="teams-container">
+                        <div className="team">
                             <h3>Equipo 1</h3>
                             {teams.team1.map((player, index) => (
                                 <p key={index}>{player.Jugador}</p>
                             ))}
                         </div>
                         
-                        <div style={{ width: '48%' }}>
+                        <div className="team">
                             <h3>Equipo 2</h3>
                             {teams.team2.map((player, index) => (
                                 <p key={index}>{player.Jugador}</p>
@@ -186,16 +178,16 @@ const App = () => {
                         type="file"
                         accept=".csv"
                         onChange={handleFileImport}
-                        style={{ display: 'none' }}
                         id="fileInput"
+                        className="file-input"
                     />
-                    <label htmlFor="fileInput" style={{ cursor: 'pointer', color: 'whitesmoke', display: 'flex', alignItems: 'center' }}>
+                    <label htmlFor="fileInput" className="file-label">
                         <Upload className="mr-2" /> Importar jugadores
                     </label>
                 </div>
                 <div 
                     onClick={createTeams} 
-                    style={{ cursor: 'pointer', color: 'whitesmoke', display: 'flex', alignItems: 'center' }}
+                    className="create-teams-btn"
                 >
                     <Users className="mr-2" />
                     <p>Armar equipos</p>
@@ -203,17 +195,10 @@ const App = () => {
             </div>
 
             {teams.team1.length > 0 && (
-                <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                <div className="copy-teams-container">
                     <button 
                         onClick={copyAllTeamsToClipboard}
-                        style={{ 
-                            padding: '10px', 
-                            backgroundColor: '#007bff', 
-                            color: 'white', 
-                            border: 'none', 
-                            borderRadius: '5px', 
-                            cursor: 'pointer' 
-                        }}
+                        className="copy-teams-btn"
                     >
                         Copiar Todos los Jugadores
                     </button>

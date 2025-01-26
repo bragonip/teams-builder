@@ -1,100 +1,58 @@
-:root {
-    --bg-dark: #212f3d;
-    --bg-darker: #0f1415;
-    --bg-content: #212c2e;
-    --bg-options: #506a6f;
-    --text-light: whitesmoke;
-    --transition-speed: 0.3s;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    font-size: 16px;
-    font-family: "Ubuntu", "Segoe UI", Roboto, sans-serif;
-    line-height: 1.6;
-}
-
-.app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    max-width: 600px;
-    margin: 0 auto;
-    box-shadow: 0 0 20px rgba(0,0,0,0.2);
-}
-
-.notification {
-    background-color: var(--bg-darker);
-    color: var(--text-light);
-    padding: 10px;
+.player-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    letter-spacing: 0.5px;
-}
-
-.content {
-    color: var(--text-light);
-    flex-grow: 1;
-    overflow-y: auto;
-    background-color: var(--bg-content);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.3) transparent;
-}
-
-.content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.content::-webkit-scrollbar-thumb {
-    background-color: rgba(255,255,255,0.3);
-    border-radius: 4px;
-}
-
-.options {
-    background-color: var(--bg-options);
-    color: var(--text-light);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 20px;
-    padding: 15px;
-    transition: background-color var(--transition-speed);
-}
-
-.csv_handler {
-    display: flex;
-    align-items: center;
-    gap: 10px;
     cursor: pointer;
-    transition: opacity var(--transition-speed);
+    padding: 5px;
+    margin: 2px 0;
+    color: white;
 }
 
-.csv_handler:hover {
-    opacity: 0.8;
+.player-item.selected {
+    background-color: #4CAF50;
 }
 
-@media (max-width: 480px) {
-    .app {
-        width: 100%;
-        max-width: 100%;
-    }
-    
-    .options {
-        flex-direction: column;
-        gap: 15px;
-    }
+.teams-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.team {
+    width: 48%;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    cursor: pointer;
+    color: whitesmoke;
+    display: flex;
+    align-items: center;
+}
+
+.create-teams-btn {
+    cursor: pointer;
+    color: whitesmoke;
+    display: flex;
+    align-items: center;
+}
+
+.copy-teams-container {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.copy-teams-btn {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.error-message {
+    color: red;
 }
