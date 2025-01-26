@@ -57,12 +57,12 @@ const App = () => {
         );
     };
 
-    const createTeams = () => {
+    const createBalancedTeams = () => {
         if (selectedPlayers.length < 2) {
             setError("Selecciona al menos 2 jugadores");
             return;
         }
-
+    
         const skillColumns = Object.keys(skillImportance);
         const sortedPlayers = [...selectedPlayers].sort((a, b) => {
             const calculatePlayerScore = (player) => {
@@ -72,21 +72,27 @@ const App = () => {
                     return score + (skillValue * skillImportanceValue);
                 }, 0);
             };
-
+    
             return calculatePlayerScore(b) - calculatePlayerScore(a);
         });
-
+    
         const team1 = [];
         const team2 = [];
-        
-        sortedPlayers.forEach((player, index) => {
-            if (index % 2 === 0) {
+        let team1Score = 0;
+        let team2Score = 0;
+    
+        for (const player of sortedPlayers) {
+            const playerScore = calculatePlayerScore(player);
+            
+            if (team1Score <= team2Score) {
                 team1.push(player);
+                team1Score += playerScore;
             } else {
                 team2.push(player);
+                team2Score += playerScore;
             }
-        });
-
+        }
+    
         setTeams({ team1, team2 });
     };
 
