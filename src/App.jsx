@@ -103,12 +103,14 @@ const App = () => {
         setTeams({ team1, team2 });
     };
 
-    const copyPlayersToClipboard = (teamKey) => {
-        const team = teams[teamKey];
-        const teamPlayers = team.map(player => player.Jugador).join('\n');
-
-        navigator.clipboard.writeText(teamPlayers)
-            .then(() => alert(`Equipo copiado al portapapeles`))
+    const copyAllTeamsToClipboard = () => {
+        const allTeamPlayers = [
+            ...teams.team1.map(player => player.Jugador),
+            ...teams.team2.map(player => player.Jugador)
+        ].join('\n');
+    
+        navigator.clipboard.writeText(allTeamPlayers)
+            .then(() => alert(`Todos los jugadores copiados al portapapeles`))
             .catch(err => console.error('Error al copiar:', err));
     };
 
@@ -130,55 +132,33 @@ const App = () => {
                 )}
             </div>
             
-            <div className='content'>
-                {allPlayers.length > 0 && (
-                    <div>
-                        <h3>Seleccionar Jugadores</h3>
-                        {allPlayers.map((player, index) => (
-                            <div 
-                                key={index} 
-                                onClick={() => togglePlayerSelection(player)}
-                                style={{
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    cursor: 'pointer',
-                                    backgroundColor: selectedPlayers.includes(player) ? '#4CAF50' : 'transparent',
-                                    color: selectedPlayers.includes(player) ? 'white' : 'black',
-                                    padding: '5px',
-                                    margin: '2px 0'
-                                }}
-                            >
-                                {selectedPlayers.includes(player) && <Check size={20} />}
-                                {player.Jugador}
-                            </div>
-                        ))}
-                    </div>
-                )}
+        <div className='content' style={{ display: 'flex', justifyContent: 'space-between' }}>
+            {teams.team1.length > 0 && (
+                <div style={{ width: '48%' }}>
+                    <h3>Equipo 1</h3>
+                    {teams.team1.map((player, index) => (
+                        <p key={index}>{player.Jugador}</p>
+                    ))}
+                </div>
+            )}
+            
+            {teams.team2.length > 0 && (
+                <div style={{ width: '48%' }}>
+                    <h3>Equipo 2</h3>
+                    {teams.team2.map((player, index) => (
+                        <p key={index}>{player.Jugador}</p>
+                    ))}
+                </div>
+            )}
+        </div>
 
-                {teams.team1.length > 0 && (
-                    <div>
-                        <h3>Equipo 1</h3>
-                        {teams.team1.map((player, index) => (
-                            <p key={index}>{player.Jugador}</p>
-                        ))}
-                        <button onClick={() => copyPlayersToClipboard('team1')}>
-                            Copiar Equipo 1
-                        </button>
-                    </div>
-                )}
-                
-                {teams.team2.length > 0 && (
-                    <div>
-                        <h3>Equipo 2</h3>
-                        {teams.team2.map((player, index) => (
-                            <p key={index}>{player.Jugador}</p>
-                        ))}
-                        <button onClick={() => copyPlayersToClipboard('team2')}>
-                            Copiar Equipo 2
-                        </button>
-                    </div>
-                )}
+        {teams.team1.length > 0 && (
+            <div>
+                <button onClick={copyAllTeamsToClipboard}>
+                    Copiar Todos los Jugadores
+                </button>
             </div>
+        )}
             
             <div className='options'>
                 <div className='csv_handler'>
