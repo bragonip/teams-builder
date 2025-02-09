@@ -57,13 +57,15 @@ const App = () => {
         );
     };
 
-    const createTeams = () => {
+    cconst createTeams = () => {
         if (selectedPlayers.length < 2) {
             setError("Selecciona al menos 2 jugadores");
             return;
         }
     
-        const skillColumns = Object.keys(skillImportance);
+        const skillColumns = Object.keys(skillImportance).filter(col => col !== 'Categoria');
+        
+        // Calculate player scores
         const calculatePlayerScore = (player) => {
             return skillColumns.reduce((score, col) => {
                 const skillImportanceValue = skillImportance[col];
@@ -71,40 +73,44 @@ const App = () => {
                 return score + (skillValue * skillImportanceValue);
             }, 0);
         };
-    
-        const sortedPlayers = [...selectedPlayers].sort((a, b) => 
-            calculatePlayerScore(b) - calculatePlayerScore(a)
-        );
-    
+
+        // Group players by category
+        const playersByCategory = selectedPlayers.reduce((acc, player) => {
+            const category = player.Categoria || 'Sin categoria';
+            if (!acc[category]) {
+                acc[category] = [];
+            }
+            acc[category].push({
+                ...player,
+                score: calculatePlayerScore(player)
+            });
+            return acc;
+        }, {});
+
+        // Sort players within each category by score
+        Object.values(playersByCategory).forEach(categoryPlayers => {
+            categoryPlayers.sort((a, b) => b.score - a.score);
+        });
+
         const team1 = [];
         const team2 = [];
         let team1Score = 0;
         let team2Score = 0;
-    
-        // Randomly select first players for each team
-        const firstTeam1Player = sortedPlayers[Math.floor(Math.random() * sortedPlayers.length)];
-        team1.push(firstTeam1Player);
-        team1Score += calculatePlayerScore(firstTeam1Player);
-    
-        const remainingPlayers = sortedPlayers.filter(p => p !== firstTeam1Player);
-        const firstTeam2Player = remainingPlayers[Math.floor(Math.random() * remainingPlayers.length)];
-        team2.push(firstTeam2Player);
-        team2Score += calculatePlayerScore(firstTeam2Player);
-    
-        // Continue distributing remaining players
-        const finalRemainingPlayers = remainingPlayers.filter(p => p !== firstTeam2Player);
-        for (const player of finalRemainingPlayers) {
-            const playerScore = calculatePlayerScore(player);
-            
-            if (team1Score <= team2Score) {
-                team1.push(player);
-                team1Score += playerScore;
-            } else {
-                team2.push(player);
-                team2Score += playerScore;
-            }
-        }
-    
+
+        // Distribute players by category
+        Object.entries(playersByCategory).forEach(([category, players]) => {
+            players.forEach((player, index) => {
+                // For each category, alternate between teams, but consider total team score
+                if (team1Score <= team2Score) {
+                    team1.push(player);
+                    team1Score += player.score;
+                } else {
+                    team2.push(player);
+                    team2Score += player.score;
+                }
+            });
+        });
+
         setTeams({ team1, team2 });
     };
 
