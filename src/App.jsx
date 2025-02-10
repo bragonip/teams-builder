@@ -74,34 +74,55 @@ const App = () => {
             }, 0);
         };
 
-        // Group players by category
-        const playersByCategory = selectedPlayers.reduce((acc, player) => {
-            const category = player.Categoria || 'Sin categoria';
-            if (!acc[category]) {
-                acc[category] = [];
-            }
-            acc[category].push({
-                ...player,
-                score: calculatePlayerScore(player)
-            });
-            return acc;
-        }, {});
+        // Add scores to all players
+        const playersWithScores = selectedPlayers.map(player => ({
+            ...player,
+            score: calculatePlayerScore(player)
+        }));
 
-        // Sort players within each category by score
-        Object.values(playersByCategory).forEach(categoryPlayers => {
-            categoryPlayers.sort((a, b) => b.score - a.score);
-        });
+        // Sort players by score (high to low)
+        const sortedPlayers = [...playersWithScores].sort((a, b) => b.score - a.score);
 
         const team1 = [];
         const team2 = [];
         let team1Score = 0;
         let team2Score = 0;
 
-        // Distribute players by category
-        Object.entries(playersByCategory).forEach(([category, players]) => {
-            players.forEach((player, index) => {
-                // For each category, alternate between teams, but consider total team score
-                if (team1Score <= team2Score) {
+        // Group players by category
+        const playersByCategory = {};
+        sortedPlayers.forEach(player => {
+            const category = player.Categoria || 'Sin categoria';
+            if (!playersByCategory[category]) {
+                playersByCategory[category] = [];
+            }
+            playersByCategory[category].push(player);
+        });
+
+        // Helper function to get the count of a category in a team
+        const getCategoryCount = (team, category) => {
+            return team.filter(player => (player.Categoria || 'Sin categoria') === category).length;
+        };
+
+        // Helper function to determine which team should receive the next player
+        const getTargetTeam = (player, team1, team2) => {
+            const category = player.Categoria || 'Sin categoria';
+            const team1CategoryCount = getCategoryCount(team1, category);
+            const team2CategoryCount = getCategoryCount(team2, category);
+            
+            // If category counts are different, prefer the team with fewer players of this category
+            if (team1CategoryCount !== team2CategoryCount) {
+                return team1CategoryCount < team2CategoryCount ? team1 : team2;
+            }
+            
+            // If category counts are equal, prefer the team with lower total score
+            return team1Score <= team2Score ? team1 : team2;
+        };
+
+        // Distribute players by category while maintaining balance
+        Object.values(playersByCategory).forEach(categoryPlayers => {
+            categoryPlayers.forEach(player => {
+                const targetTeam = getTargetTeam(team1, team2);
+                if (targetTeam === team1) {
                     team1.push(player);
                     team1Score += player.score;
                 } else {
