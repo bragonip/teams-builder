@@ -29,7 +29,7 @@ const App = () => {
                 }
                 
                 const columns = Object.keys(results.data[0]);
-                const playerColumns = columns.filter(col => col !== 'jugador' || col !== 'categoria');
+                const playerColumns = columns.filter(col => col !== 'Jugador' || col !== 'categoria');
                 
                 const importanceValues = results.data[0];
                 const importance = {};
