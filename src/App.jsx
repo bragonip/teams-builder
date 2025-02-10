@@ -29,7 +29,10 @@ const App = () => {
                 }
                 
                 const columns = Object.keys(results.data[0]);
-                const playerColumns = columns.filter(col => col !== 'Jugador' || col !== 'categoria');
+                // Fix: Correct filter logic for player columns
+                const playerColumns = columns.filter(col => 
+                    col !== 'Jugador' && col !== 'categoria' && col !== 'Categoria'
+                );
                 
                 const importanceValues = results.data[0];
                 const importance = {};
@@ -63,7 +66,7 @@ const App = () => {
             return;
         }
     
-        const skillColumns = Object.keys(skillImportance).filter(col => col !== 'Categoria');
+        const skillColumns = Object.keys(skillImportance);
         
         // Calculate player scores
         const calculatePlayerScore = (player) => {
@@ -91,7 +94,7 @@ const App = () => {
         // Group players by category
         const playersByCategory = {};
         sortedPlayers.forEach(player => {
-            const category = player.Categoria || 'Sin categoria';
+            const category = player.categoria || player.Categoria || 'Sin categoria';
             if (!playersByCategory[category]) {
                 playersByCategory[category] = [];
             }
@@ -100,29 +103,19 @@ const App = () => {
 
         // Helper function to get the count of a category in a team
         const getCategoryCount = (team, category) => {
-            return team.filter(player => (player.Categoria || 'Sin categoria') === category).length;
+            return team.filter(player => 
+                (player.categoria || player.Categoria || 'Sin categoria') === category
+            ).length;
         };
 
-        // Helper function to determine which team should receive the next player
-        const getTargetTeam = (player, team1, team2) => {
-            const category = player.Categoria || 'Sin categoria';
-            const team1CategoryCount = getCategoryCount(team1, category);
-            const team2CategoryCount = getCategoryCount(team2, category);
-            
-            // If category counts are different, prefer the team with fewer players of this category
-            if (team1CategoryCount !== team2CategoryCount) {
-                return team1CategoryCount < team2CategoryCount ? team1 : team2;
-            }
-            
-            // If category counts are equal, prefer the team with lower total score
-            return team1Score <= team2Score ? team1 : team2;
-        };
-
-        // Distribute players by category while maintaining balance
+        // Distribute players category by category
         Object.values(playersByCategory).forEach(categoryPlayers => {
             categoryPlayers.forEach(player => {
-                const targetTeam = getTargetTeam(team1, team2);
-                if (targetTeam === team1) {
+                const category = player.categoria || player.Categoria || 'Sin categoria';
+                const team1CategoryCount = getCategoryCount(team1, category);
+                const team2CategoryCount = getCategoryCount(team2, category);
+
+                if (team1CategoryCount <= team2CategoryCount && team1Score <= team2Score) {
                     team1.push(player);
                     team1Score += player.score;
                 } else {
@@ -136,8 +129,12 @@ const App = () => {
     };
 
     const copyAllTeamsToClipboard = () => {
-        const team1Players = teams.team1.map(player => `Equipo 1: ${player.Jugador}`);
-        const team2Players = teams.team2.map(player => `Equipo 2: ${player.Jugador}`);
+        const team1Players = teams.team1.map(player => 
+            `Equipo 1: ${player.Jugador} (${player.categoria || player.Categoria || 'Sin categoria'})`
+        );
+        const team2Players = teams.team2.map(player => 
+            `Equipo 2: ${player.Jugador} (${player.categoria || player.Categoria || 'Sin categoria'})`
+        );
         const allTeamPlayers = [...team1Players, ...team2Players].join('\n');
 
         navigator.clipboard.writeText(allTeamPlayers)
@@ -174,7 +171,7 @@ const App = () => {
                                 className={`player-item ${selectedPlayers.includes(player) ? 'selected' : ''}`}
                             >
                                 {selectedPlayers.includes(player) && <Check size={20} />}
-                                {player.Jugador}
+                                {player.Jugador} ({player.categoria || player.Categoria || 'Sin categoria'})
                             </div>
                         ))}
                     </div>
@@ -185,14 +182,18 @@ const App = () => {
                         <div className="team">
                             <h3>Equipo 1</h3>
                             {teams.team1.map((player, index) => (
-                                <p key={index}>{player.Jugador}</p>
+                                <p key={index}>
+                                    {player.Jugador} ({player.categoria || player.Categoria || 'Sin categoria'})
+                                </p>
                             ))}
                         </div>
                         
                         <div className="team">
                             <h3>Equipo 2</h3>
                             {teams.team2.map((player, index) => (
-                                <p key={index}>{player.Jugador}</p>
+                                <p key={index}>
+                                    {player.Jugador} ({player.categoria || player.Categoria || 'Sin categoria'})
+                                </p>
                             ))}
                         </div>
                     </div>
