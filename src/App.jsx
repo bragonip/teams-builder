@@ -76,45 +76,61 @@ const App = () => {
                 return score + (skillValue * skillImportanceValue);
             }, 0);
         };
-
+    
         // Add scores to all players
         const playersWithScores = selectedPlayers.map(player => ({
             ...player,
             score: calculatePlayerScore(player)
         }));
-
-        // Sort players by score (high to low)
-        const sortedPlayers = [...playersWithScores].sort((a, b) => b.score - a.score);
-
+    
+        // Randomly select first players for each team
         const team1 = [];
         const team2 = [];
         let team1Score = 0;
         let team2Score = 0;
-
-        // Group players by category
+    
+        // Random selection for first player in team 1
+        const randomIndex1 = Math.floor(Math.random() * playersWithScores.length);
+        const firstTeam1Player = playersWithScores[randomIndex1];
+        team1.push(firstTeam1Player);
+        team1Score += firstTeam1Player.score;
+    
+        // Remove first player from the pool
+        const remainingPlayers = playersWithScores.filter((_, index) => index !== randomIndex1);
+    
+        // Random selection for first player in team 2
+        const randomIndex2 = Math.floor(Math.random() * remainingPlayers.length);
+        const firstTeam2Player = remainingPlayers[randomIndex2];
+        team2.push(firstTeam2Player);
+        team2Score += firstTeam2Player.score;
+    
+        // Remove second player from the pool
+        const finalRemainingPlayers = remainingPlayers.filter((_, index) => index !== randomIndex2);
+    
+        // Group remaining players by category
         const playersByCategory = {};
-        sortedPlayers.forEach(player => {
-            const category = player.categoria || player.Categoria || 'Sin categoria';
+        finalRemainingPlayers.forEach(player => {
+            const category = player.categoria || 'Sin categoria';
             if (!playersByCategory[category]) {
                 playersByCategory[category] = [];
             }
             playersByCategory[category].push(player);
         });
-
+    
         // Helper function to get the count of a category in a team
         const getCategoryCount = (team, category) => {
             return team.filter(player => 
-                (player.categoria || player.Categoria || 'Sin categoria') === category
+                (player.categoria || 'Sin categoria') === category
             ).length;
         };
-
-        // Distribute players category by category
+    
+        // Distribute remaining players category by category
         Object.values(playersByCategory).forEach(categoryPlayers => {
             categoryPlayers.forEach(player => {
-                const category = player.categoria || player.Categoria || 'Sin categoria';
+                const category = player.categoria || 'Sin categoria';
                 const team1CategoryCount = getCategoryCount(team1, category);
                 const team2CategoryCount = getCategoryCount(team2, category);
-
+    
                 if (team1CategoryCount <= team2CategoryCount && team1Score <= team2Score) {
                     team1.push(player);
                     team1Score += player.score;
@@ -124,7 +140,7 @@ const App = () => {
                 }
             });
         });
-
+    
         setTeams({ team1, team2 });
     };
 
