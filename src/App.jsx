@@ -171,7 +171,7 @@ const App = () => {
                                 className={`player-item ${selectedPlayers.includes(player) ? 'selected' : ''}`}
                             >
                                 {selectedPlayers.includes(player) && <Check size={20} />}
-                                {player.Jugador} ({player.categoria || player.Categoria || 'Sin categoria'})
+                                {player.Jugador}
                             </div>
                         ))}
                     </div>
@@ -183,7 +183,7 @@ const App = () => {
                             <h3>Equipo 1</h3>
                             {teams.team1.map((player, index) => (
                                 <p key={index}>
-                                    {player.Jugador} ({player.categoria || player.Categoria || 'Sin categoria'})
+                                    {player.Jugador}
                                 </p>
                             ))}
                         </div>
@@ -192,7 +192,7 @@ const App = () => {
                             <h3>Equipo 2</h3>
                             {teams.team2.map((player, index) => (
                                 <p key={index}>
-                                    {player.Jugador} ({player.categoria || player.Categoria || 'Sin categoria'})
+                                    {player.Jugador}
                                 </p>
                             ))}
                         </div>
