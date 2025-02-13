@@ -56,3 +56,13 @@
 .error-message {
     color: darkred;
 }
+
+.skill-importance-controls {
+    margin: 1rem 0;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  input[type="range"] {
+    accent-color: #4f46e5;
+  }

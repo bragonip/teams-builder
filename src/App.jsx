@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Upload, Users, Check } from 'lucide-react';
 import Papa from 'papaparse';
 import './App.css';
+import SkillImportanceControls from './SkillImportanceControls';
 
 const App = () => {
     const [allPlayers, setAllPlayers] = useState([]);
@@ -214,7 +215,14 @@ const App = () => {
                         </div>
                     </div>
                 )}
+                {Object.keys(skillImportance).length > 0 && (
+                  <SkillImportanceControls
+                    skillImportance={skillImportance}
+                    onImportanceChange={setSkillImportance}
+                  />
+                )}
             </div>
+            
             
             <div className='options'>
                 <div className='csv_handler'>
