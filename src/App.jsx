@@ -1,302 +1,255 @@
-// App.js
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { DndProvider, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import React, { useEffect, useState } from 'react';
+import { Upload, Users, Check } from 'lucide-react';
 import Papa from 'papaparse';
-import { openDB } from 'idb';
-import { Upload, Users, Check, X, Clipboard, Info } from 'lucide-react';
 import './App.css';
 
-// Constants
-const DEFAULT_CATEGORY = 'Sin categoria';
-const REQUIRED_COLUMNS = ['jugador', 'categoria'];
-const SKILL_WEIGHT_RANGE = { min: 0.1, max: 5 };
-
-// IDB Configuration
-const initializeDB = async () => {
-  return openDB('teamBalancerDB', 1, {
-    upgrade(db) {
-      db.createObjectStore('players', { keyPath: 'id' });
-      db.createObjectStore('config', { keyPath: 'name' });
-    },
-  });
-};
-
-// Custom Hooks
-const useTeamBalancer = () => {
-  const [teams, setTeams] = useState({ team1: [], team2: [] });
-  const [balanceMetric, setBalanceMetric] = useState(0);
-
-  const calculateBalance = useCallback((team1, team2) => {
-    const t1Score = team1.reduce((sum, p) => sum + p.score, 0);
-    const t2Score = team2.reduce((sum, p) => sum + p.score, 0);
-    return Math.abs(t1Score - t2Score) / Math.max(t1Score, t2Score);
-  }, []);
-
-  const optimizeTeams = useCallback((players, categories) => {
-    // Implementation of genetic algorithm would go here
-    // Simplified version for demonstration:
-    const mid = Math.ceil(players.length / 2);
-    const team1 = players.slice(0, mid);
-    const team2 = players.slice(mid);
-    
-    return {
-      team1,
-      team2,
-      balance: calculateBalance(team1, team2)
-    };
-  }, [calculateBalance]);
-
-  return { teams, balanceMetric, optimizeTeams };
-};
-
-const PlayerItem = ({ player, selected, onToggle }) => {
-  const [{ isDragging }, drag] = useDrag(() => ({
-    type: 'player',
-    item: { player },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
-    }),
-  }));
-
-  return (
-    <div
-      ref={drag}
-      className={`player-item ${selected ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
-      onClick={() => onToggle(player)}
-    >
-      {selected ? <Check size={16} /> : <X size={16} />}
-      <span>{player.jugador}</span>
-      <span className="category-badge">{player.categoria}</span>
-    </div>
-  );
-};
-
-const TeamSlot = ({ team, players, onDrop }) => {
-  const [{ isOver }, drop] = useDrop(() => ({
-    accept: 'player',
-    drop: (item) => onDrop(item.player, team),
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
-  }));
-
-  return (
-    <div
-      ref={drop}
-      className={`team-slot ${isOver ? 'drop-target' : ''}`}
-    >
-      <h3>{team}</h3>
-      {players.map((player) => (
-        <div key={player.id} className="team-player">
-          {player.jugador} ({player.categoria})
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// Main Component
 const App = () => {
-  const [allPlayers, setAllPlayers] = useState([]);
-  const [selectedPlayers, setSelectedPlayers] = useState(new Set());
-  const [skillWeights, setSkillWeights] = useState({});
-  const [teams, setTeams] = useState({ team1: [], team2: [] });
-  const [balance, setBalance] = useState(0);
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+    const [allPlayers, setAllPlayers] = useState([]);
+    const [selectedPlayers, setSelectedPlayers] = useState([]);
+    const [skillImportance, setSkillImportance] = useState({});
+    const [teams, setTeams] = useState({ team1: [], team2: [] });
+    const [error, setError] = useState(null);
 
-  const { optimizeTeams } = useTeamBalancer();
-
-  // IDB Initialization
-  useEffect(() => {
-    initializeDB().then((db) => {
-      db.getAll('players').then((players) => {
-        if (players.length > 0) setAllPlayers(players);
-      });
-    });
-  }, []);
-
-  const normalizePlayer = useCallback((player) => {
-    const normalized = { 
-      id: crypto.randomUUID(),
-      categoria: DEFAULT_CATEGORY,
-      skills: {}
+    const setAppHeight = () => {
+        const app = document.querySelector('.app');
+        if (app) app.style.height = `${window.innerHeight}px`;
     };
 
-    Object.entries(player).forEach(([key, value]) => {
-      const lowerKey = key.toLowerCase();
-      if (lowerKey === 'jugador') {
-        normalized.jugador = value.trim();
-      } else if (lowerKey === 'categoria') {
-        normalized.categoria = value.trim() || DEFAULT_CATEGORY;
-      } else {
-        normalized.skills[lowerKey] = parseFloat(value) || 0;
-      }
-    });
+    const handleFileImport = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
 
-    return normalized;
-  }, []);
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => {
+                if (results.data.length <= 1) {
+                    setError("El archivo CSV está vacío o no tiene jugadores");
+                    return;
+                }
+                
+                const columns = Object.keys(results.data[0]);
+                // Fix: Correct filter logic for player columns
+                const playerColumns = columns.filter(col => 
+                    col !== 'Jugador' && col !== 'categoria' && col !== 'Categoria'
+                );
+                
+                const importanceValues = results.data[0];
+                const importance = {};
+                playerColumns.forEach(col => {
+                    importance[col] = parseFloat(importanceValues[col]) || 1;
+                });
+                setSkillImportance(importance);
 
-  const handleFileUpload = useCallback(async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+                const actualPlayers = results.data.slice(1);
+                setAllPlayers(actualPlayers);
+                setError(null);
+            },
+            error: (error) => {
+                setError("Error al parsear el archivo CSV");
+                console.error("Error al parsear el archivo CSV:", error);
+            }
+        });
+    };
 
-    setLoading(true);
-    Papa.parse(file, {
-      header: true,
-      complete: async (results) => {
-        try {
-          const normalized = results.data.map(normalizePlayer);
-          const db = await initializeDB();
-          const tx = db.transaction('players', 'readwrite');
-          
-          await Promise.all([
-            ...normalized.map((player) => tx.store.put(player)),
-            tx.done,
-          ]);
+    const togglePlayerSelection = (player) => {
+        setSelectedPlayers(prev => 
+            prev.includes(player)
+                ? prev.filter(p => p !== player)
+                : [...prev, player]
+        );
+    };
 
-          setAllPlayers(normalized);
-          setError(null);
-        } catch (err) {
-          setError('Error processing CSV file');
-        } finally {
-          setLoading(false);
+    const createTeams = () => {
+        if (selectedPlayers.length < 2) {
+            setError("Selecciona al menos 2 jugadores");
+            return;
         }
-      },
-      error: () => {
-        setError('Invalid CSV format');
-        setLoading(false);
-      }
-    });
-  }, [normalizePlayer]);
-
-  const calculateScores = useCallback(() => {
-    return Array.from(selectedPlayers).map((player) => ({
-      ...player,
-      score: Object.entries(player.skills).reduce(
-        (sum, [skill, value]) => sum + (value * (skillWeights[skill] || 1)),
-        0
-      )
-    }));
-  }, [selectedPlayers, skillWeights]);
-
-  const handleGenerateTeams = useCallback(async () => {
-    const scoredPlayers = calculateScores();
-    const { team1, team2, balance } = optimizeTeams(scoredPlayers);
     
-    setTeams({ team1, team2 });
-    setBalance(balance);
-  }, [calculateScores, optimizeTeams]);
-
-  const handleWeightChange = useCallback((skill, value) => {
-    const numericValue = Math.max(
-      SKILL_WEIGHT_RANGE.min, 
-      Math.min(SKILL_WEIGHT_RANGE.max, parseFloat(value))
-    );
+        const skillColumns = Object.keys(skillImportance);
+        
+        // Calculate player scores
+        const calculatePlayerScore = (player) => {
+            return skillColumns.reduce((score, col) => {
+                const skillImportanceValue = skillImportance[col];
+                const skillValue = parseFloat(player[col] || 0);
+                return score + (skillValue * skillImportanceValue);
+            }, 0);
+        };
     
-    setSkillWeights(prev => ({
-      ...prev,
-      [skill]: numericValue
-    }));
-  }, []);
+        // Add scores to all players
+        const playersWithScores = selectedPlayers.map(player => ({
+            ...player,
+            score: calculatePlayerScore(player)
+        }));
+    
+        // Randomly select first players for each team
+        const team1 = [];
+        const team2 = [];
+        let team1Score = 0;
+        let team2Score = 0;
+    
+        // Random selection for first player in team 1
+        const randomIndex1 = Math.floor(Math.random() * playersWithScores.length);
+        const firstTeam1Player = playersWithScores[randomIndex1];
+        team1.push(firstTeam1Player);
+        team1Score += firstTeam1Player.score;
+    
+        // Remove first player from the pool
+        const remainingPlayers = playersWithScores.filter((_, index) => index !== randomIndex1);
+    
+        // Random selection for first player in team 2
+        const randomIndex2 = Math.floor(Math.random() * remainingPlayers.length);
+        const firstTeam2Player = remainingPlayers[randomIndex2];
+        team2.push(firstTeam2Player);
+        team2Score += firstTeam2Player.score;
+    
+        // Remove second player from the pool
+        const finalRemainingPlayers = remainingPlayers.filter((_, index) => index !== randomIndex2);
+    
+        // Group remaining players by category
+        const playersByCategory = {};
+        finalRemainingPlayers.forEach(player => {
+            const category = player.categoria || 'Sin categoria';
+            if (!playersByCategory[category]) {
+                playersByCategory[category] = [];
+            }
+            playersByCategory[category].push(player);
+        });
+    
+        // Helper function to get the count of a category in a team
+        const getCategoryCount = (team, category) => {
+            return team.filter(player => 
+                (player.categoria || 'Sin categoria') === category
+            ).length;
+        };
+    
+        // Distribute remaining players category by category
+        Object.values(playersByCategory).forEach(categoryPlayers => {
+            categoryPlayers.forEach(player => {
+                const category = player.categoria || 'Sin categoria';
+                const team1CategoryCount = getCategoryCount(team1, category);
+                const team2CategoryCount = getCategoryCount(team2, category);
+    
+                if (team1CategoryCount <= team2CategoryCount && team1Score <= team2Score) {
+                    team1.push(player);
+                    team1Score += player.score;
+                } else {
+                    team2.push(player);
+                    team2Score += player.score;
+                }
+            });
+        });
+    
+        setTeams({ team1, team2 });
+    };
 
-  return (
-    <DndProvider backend={HTML5Backend}>
-      <div className="app-container">
-        <header>
-          <h1>Team Balancer Pro</h1>
-          <div className="balance-meter">
-            <div 
-              className="balance-indicator" 
-              style={{ width: `${(1 - balance) * 100}%` }}
-            />
-            <span>Balance: {(100 - balance * 100).toFixed(1)}%</span>
-          </div>
-        </header>
+    const copyAllTeamsToClipboard = () => {
+        const team1Players = teams.team1.map(player => 
+            `Equipo 1: ${player.Jugador} (${player.categoria || player.Categoria || 'Sin categoria'})`
+        );
+        const team2Players = teams.team2.map(player => 
+            `Equipo 2: ${player.Jugador} (${player.categoria || player.Categoria || 'Sin categoria'})`
+        );
+        const allTeamPlayers = [...team1Players, ...team2Players].join('\n');
 
-        <main>
-          <section className="config-panel">
-            <div className="file-upload">
-              <label>
-                <Upload size={20} />
-                Import CSV
-                <input type="file" accept=".csv" onChange={handleFileUpload} />
-              </label>
+        navigator.clipboard.writeText(allTeamPlayers)
+            .then(() => alert(`Todos los jugadores copiados al portapapeles`))
+            .catch(err => console.error('Error al copiar:', err));
+    };
+
+    useEffect(() => {
+        setAppHeight();
+        window.addEventListener('resize', setAppHeight);
+        return () => window.removeEventListener('resize', setAppHeight);
+    }, []);
+
+    return (
+        <div className='app'>
+            <div className='notification'>
+                {error && <p className="error-message">{error}</p>}
+                {allPlayers.length > 0 && (
+                    <p>Jugadores en lista: {allPlayers.length}</p>
+                )}
+                {selectedPlayers.length > 0 && (
+                    <p>Jugadores seleccionados: {selectedPlayers.length}</p>
+                )}
             </div>
+            
+            <div className='content'>
+                {allPlayers.length > 0 && (
+                    <div className="player-selection">
+                        <h3>Seleccionar Jugadores</h3>
+                        {allPlayers.map((player, index) => (
+                            <div 
+                                key={index} 
+                                onClick={() => togglePlayerSelection(player)}
+                                className={`player-item ${selectedPlayers.includes(player) ? 'selected' : ''}`}
+                            >
+                                {selectedPlayers.includes(player) && <Check size={20} />}
+                                {player.Jugador}
+                            </div>
+                        ))}
+                    </div>
+                )}
 
-            <div className="skill-weights">
-              <h3>Skill Weights</h3>
-              {Object.keys(allPlayers[0]?.skills || {}).map((skill) => (
-                <div key={skill} className="weight-control">
-                  <label>{skill}</label>
-                  <input
-                    type="number"
-                    min={SKILL_WEIGHT_RANGE.min}
-                    max={SKILL_WEIGHT_RANGE.max}
-                    step="0.1"
-                    value={skillWeights[skill] || 1}
-                    onChange={(e) => handleWeightChange(skill, e.target.value)}
-                  />
+                {teams.team1.length > 0 && (
+                    <div className="teams-container">
+                        <div className="team">
+                            <h3>Equipo 1</h3>
+                            {teams.team1.map((player, index) => (
+                                <p key={index}>
+                                    {player.Jugador}
+                                </p>
+                            ))}
+                        </div>
+                        
+                        <div className="team">
+                            <h3>Equipo 2</h3>
+                            {teams.team2.map((player, index) => (
+                                <p key={index}>
+                                    {player.Jugador}
+                                </p>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+            
+            <div className='options'>
+                <div className='csv_handler'>
+                    <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileImport}
+                        id="fileInput"
+                        className="file-input"
+                    />
+                    <label htmlFor="fileInput" className="file-label">
+                        <Upload className="mr-2" /> Importar jugadores
+                    </label>
                 </div>
-              ))}
-            </div>
-          </section>
-
-          <section className="player-management">
-            <div className="player-list">
-              <h3>Available Players ({allPlayers.length})</h3>
-              {allPlayers.map((player) => (
-                <PlayerItem
-                  key={player.id}
-                  player={player}
-                  selected={selectedPlayers.has(player)}
-                  onToggle={(p) => setSelectedPlayers(prev => {
-                    const next = new Set(prev);
-                    next.has(p) ? next.delete(p) : next.add(p);
-                    return next;
-                  })}
-                />
-              ))}
+                <div 
+                    onClick={createTeams} 
+                    className="create-teams-btn"
+                >
+                    <Users className="mr-2" />
+                    <p>Armar equipos</p>
+                </div>
             </div>
 
-            <div className="team-assignment">
-              <TeamSlot
-                team="Team Alpha"
-                players={teams.team1}
-                onDrop={(player) => {/* Implement manual assignment */}}
-              />
-              <TeamSlot
-                team="Team Bravo"
-                players={teams.team2}
-                onDrop={(player) => {/* Implement manual assignment */}}
-              />
-            </div>
-          </section>
-        </main>
-
-        <footer>
-          <button 
-            onClick={handleGenerateTeams}
-            disabled={selectedPlayers.size < 2}
-          >
-            <Users size={18} />
-            Generate Balanced Teams
-          </button>
-        </footer>
-
-        {error && (
-          <div className="error-overlay">
-            <div className="error-card">
-              <Info size={24} />
-              <p>{error}</p>
-              <button onClick={() => setError(null)}>Dismiss</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </DndProvider>
-  );
+            {teams.team1.length > 0 && (
+                <div className="copy-teams-container">
+                    <button 
+                        onClick={copyAllTeamsToClipboard}
+                        className="copy-teams-btn"
+                    >
+                        Copiar Todos los Jugadores
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default App;

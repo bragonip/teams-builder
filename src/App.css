@@ -1,59 +1,58 @@
-/* App.css */
-.app-container {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    min-height: 100vh;
-    padding: 1rem;
-  }
-  
-  .player-management {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 2rem;
-  }
-  
-  .team-assignment {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  }
-  
-  .player-item {
+.player-item {
     display: flex;
     align-items: center;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    margin: 0.25rem 0;
-    cursor: move;
-    background: white;
-  }
-  
-  .team-slot {
-    border: 2px dashed #666;
-    padding: 1rem;
-    min-height: 300px;
-  }
-  
-  .balance-meter {
-    background: #eee;
-    height: 8px;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  
-  .balance-indicator {
-    height: 100%;
-    background: linear-gradient(to right, #ff6b6b, #4ecdc4);
-    transition: width 0.3s ease;
-  }
-  
-  .error-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: grid;
-    place-items: center;
-  }
+    cursor: pointer;
+    padding: 5px;
+    margin: 2px 0;
+    color: black;
+}
+
+.player-item.selected {
+    background-color: darkolivegreen;
+}
+
+.teams-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.team {
+    width: 48%;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-label {
+    cursor: pointer;
+    color: black;
+    display: flex;
+    align-items: center;
+}
+
+.create-teams-btn {
+    cursor: pointer;
+    color: black;
+    display: flex;
+    align-items: center;
+}
+
+.copy-teams-container {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.copy-teams-btn {
+    padding: 10px;
+    background-color: darkcyan;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.error-message {
+    color: darkred;
+}
