@@ -11,6 +11,10 @@ const App = () => {
     const [teams, setTeams] = useState({ team1: [], team2: [] });
     const [error, setError] = useState(null);
 
+    const [main, setMain] = useState(true)
+    const [players, setMPlayers] = useState(false)
+    const [skills, setSkills] = useState(false)
+
     const setAppHeight = () => {
         const app = document.querySelector('.app');
         if (app) app.style.height = `${window.innerHeight}px`;
@@ -176,6 +180,52 @@ const App = () => {
                     <p>Jugadores seleccionados: {selectedPlayers.length}</p>
                 )}
             </div>
+            <div>
+                {
+                    main &&
+                        <div>
+                            <div className='option'>
+                                <p>Jugadores</p>
+                            </div>
+                            <div className='option'>
+                                <p>Habilidades</p>
+                            </div>
+                        </div>
+                }
+                {
+                    players &&
+                        <div>
+                            <div className='option'>
+                                <p>Jugadores</p>
+                            </div>
+                            <div className='option'>
+                                <p>Habilidades</p>
+                            </div>
+                        </div>
+                }
+                {
+                    player &&
+                        <div>
+                            <div className='option'>
+                                <p>Jugadores</p>
+                            </div>
+                            <div className='option'>
+                                <p>Habilidades</p>
+                            </div>
+                        </div>
+                }
+                {
+                    skills &&
+                        <div>
+                            <div className='option'>
+                                <p>Jugadores</p>
+                            </div>
+                            <div className='option'>
+                                <p>Habilidades</p>
+                            </div>
+                        </div>
+                }
+            </div>
             
             <div className='content'>
                 {allPlayers.length > 0 && (
@@ -214,6 +264,12 @@ const App = () => {
                             ))}
                         </div>
                     </div>
+                )}
+                {Object.keys(skillImportance).length > 0 && (
+                  <SkillImportanceControls
+                    skillImportance={skillImportance}
+                    onImportanceChange={setSkillImportance}
+                  />
                 )}
             </div>
             

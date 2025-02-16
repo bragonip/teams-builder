@@ -215,6 +215,12 @@ const App = () => {
                         </div>
                     </div>
                 )}
+                {Object.keys(skillImportance).length > 0 && (
+                  <SkillImportanceControls
+                    skillImportance={skillImportance}
+                    onImportanceChange={setSkillImportance}
+                  />
+                )}
             </div>
             
             
