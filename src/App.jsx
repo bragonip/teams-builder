@@ -2,65 +2,20 @@ import React, { useEffect, useState } from 'react';
 import { Upload, Users, Check } from 'lucide-react';
 import Papa from 'papaparse';
 import './App.css';
+import SkillImportanceControls from './components/SkillImportanceControls';
 
 const App = () => {
-    const [players, setPlayers] = useState([]);
+    const [allPlayers, setAllPlayers] = useState([]);
     const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [skillImportance, setSkillImportance] = useState({});
     const [teams, setTeams] = useState({ team1: [], team2: [] });
-
-    const [screen, setScreen] = useState('main')
-    const [message, setMessage] = useState('')
-    const [currentPlayer, setCurrentPlayer] = useState([])
-    const [currentSkill, setCurrentSkill] = useState('')
-    const [skills, setSkills] = useState({})
-    const [creatingPlayer, setCreatingPlayer] = useState(false)
-    const [newPlayerName, setNewPlayerName] = useState("");
-    const [newPlayerCategory, setNewPlayerCategory] = useState("");
-    
+    const [error, setError] = useState(null);
 
     const setAppHeight = () => {
         const app = document.querySelector('.app');
         if (app) app.style.height = `${window.innerHeight}px`;
     };
 
-    const addSkill = (skillName) => {
-        skills.set(skillName,players)
-    }
-    const deleteSkill = (skillName) => {
-        skills.delete(skillName)
-    }
-    
-    const addPlayer = (player) => {
-        Object.keys(skills).forEach((skill) => {
-            skills[skill] = [player, ...skills[skill]];
-        });
-    };
-
-    const removePlayer = (player) => {
-        Object.keys(skills).forEach((skill) => {
-            skills[skill] = skills[skill].filter((player) => player !== player);
-        });
-    };
-
-    const skillsFrom = (player) => {
-        const result = {};
-        Object.entries(skills).forEach(([skill, players]) => {
-            const index = players.indexOf(player);
-            if (index !== -1) {
-                result[skill] = index;
-            }
-        });
-        return result;
-    };
-
-    const skillsHaveSamePlayers = () => {
-        return Object.values(skills).every(skillPlayers => {
-            return new Set(skillPlayers).size === players.length
-                && players.every(p => skillPlayers.includes(p))
-        });
-    };
-        
     const handleFileImport = (event) => {
         const file = event.target.files[0];
         if (!file) return;
@@ -70,7 +25,7 @@ const App = () => {
             skipEmptyLines: true,
             complete: (results) => {
                 if (results.data.length <= 1) {
-                    setMessage("El archivo CSV está vacío o no tiene jugadores");
+                    setError("El archivo CSV está vacío o no tiene jugadores");
                     return;
                 }
                 
@@ -88,11 +43,11 @@ const App = () => {
                 setSkillImportance(importance);
 
                 const actualPlayers = results.data.slice(1);
-                setPlayers(actualPlayers);
-                setMessage(null);
+                setAllPlayers(actualPlayers);
+                setError(null);
             },
             error: (error) => {
-                setMessage("Error al parsear el archivo CSV");
+                setError("Error al parsear el archivo CSV");
                 console.error("Error al parsear el archivo CSV:", error);
             }
         });
@@ -108,7 +63,7 @@ const App = () => {
 
     const createTeams = () => {
         if (selectedPlayers.length < 2) {
-            setMessage("Selecciona al menos 2 jugadores");
+            setError("Selecciona al menos 2 jugadores");
             return;
         }
     
@@ -190,6 +145,20 @@ const App = () => {
         setTeams({ team1, team2 });
     };
 
+    const copyAllTeamsToClipboard = () => {
+        const team1Players = teams.team1.map(player => 
+            `Equipo 1: ${player.Jugador} (${player.categoria || player.Categoria || 'Sin categoria'})`
+        );
+        const team2Players = teams.team2.map(player => 
+            `Equipo 2: ${player.Jugador} (${player.categoria || player.Categoria || 'Sin categoria'})`
+        );
+        const allTeamPlayers = [...team1Players, ...team2Players].join('\n');
+
+        navigator.clipboard.writeText(allTeamPlayers)
+            .then(() => alert(`Todos los jugadores copiados al portapapeles`))
+            .catch(err => console.error('Error al copiar:', err));
+    };
+
     useEffect(() => {
         setAppHeight();
         window.addEventListener('resize', setAppHeight);
@@ -198,192 +167,89 @@ const App = () => {
 
     return (
         <div className='app'>
-            <div className='notification_bar'>
-                <p className='message'>{message}</p>
+            <div className='notification'>
+                {error && <p className="error-message">{error}</p>}
+                {allPlayers.length > 0 && (
+                    <p>Jugadores en lista: {allPlayers.length}</p>
+                )}
+                {selectedPlayers.length > 0 && (
+                    <p>Jugadores seleccionados: {selectedPlayers.length}</p>
+                )}
             </div>
-            <div className='main_screen'>
-                {
-                    (screen == 'main') &&
-                    <div>
-                        <div className='option' onClick={()=>setScreen('players')}>
-                            <p>Jugadores</p>
-                        </div>
-                        <div className='option' onClick={()=>setScreen('skills')}>
-                            <p>Habilidades</p>
-                        </div>
-                        <div className='option' onClick={()=>setScreen('teamBuilder')}>
-                            <p>Armar equipos</p>
-                        </div>
-                    </div>
-                }
-                {
-                    (screen == 'players') &&
-                    <div>
-                        <div className='csv_handler'>
-                            <input
-                                type="file"
-                                accept=".csv"
-                                onChange={handleFileImport}
-                                id="fileInput"
-                                className="file-input"
-                            />
-                            <label htmlFor="fileInput" className="file-label">
-                                <Upload className="mr-2" /> Importar jugadores
-                            </label>
-                        </div>
-                        <div onClick={() => setCreatingPlayer(true)}>
-                            <p>Crear jugador</p>
-                        </div>
-                        {
-                            (creatingPlayer) &&
-                            <div>
-                                <div>
-                                    <label>Nombre:</label>
-                                    <input
-                                        type="text"
-                                        value={newPlayerName}
-                                        onChange={(e) => setNewPlayerName(e.target.value)}
-                                        className="w-full p-2 border rounded mb-4"
-                                    />    
-                                    <label className="block mb-2">Categoría:</label>
-                                    <input
-                                        type="text"
-                                        value={newPlayerCategory}
-                                        onChange={(e) => setNewPlayerCategory(e.target.value)}
-                                        className="w-full p-2 border rounded"
-                                    />
-                                    <div className='button-panel'>
-                                        <div className='button'>
-                                            <p>Cancelar</p>
-                                        </div>
-                                        <div className='button'>
-                                            <p>Guardar</p>
-                                        </div>
-                                    </div>
-                                </div>
+            
+            <div className='content'>
+                {allPlayers.length > 0 && (
+                    <div className="player-selection">
+                        <h3>Seleccionar Jugadores</h3>
+                        {allPlayers.map((player, index) => (
+                            <div 
+                                key={index} 
+                                onClick={() => togglePlayerSelection(player)}
+                                className={`player-item ${selectedPlayers.includes(player) ? 'selected' : ''}`}
+                            >
+                                {selectedPlayers.includes(player) && <Check size={20} />}
+                                {player.Jugador}
                             </div>
-                        }
-                        <p>{players.length} jugadores</p>
-                        <div className="players">
-                            {players.map((player, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={(() => setCurrentPlayer(player),() => setScreen(`player`))}
-                                    className={`player_item`}
-                                >
-                                    <p>{player.name}</p>
-                                </div>
+                        ))}
+                    </div>
+                )}
+
+                {teams.team1.length > 0 && (
+                    <div className="teams-container">
+                        <div className="team">
+                            <h3>Equipo 1</h3>
+                            {teams.team1.map((player, index) => (
+                                <p key={index}>
+                                    {player.Jugador}
+                                </p>
+                            ))}
+                        </div>
+                        
+                        <div className="team">
+                            <h3>Equipo 2</h3>
+                            {teams.team2.map((player, index) => (
+                                <p key={index}>
+                                    {player.Jugador}
+                                </p>
                             ))}
                         </div>
                     </div>
-                }
-                {
-                    (screen == 'player') &&
-                    <div>
-                        <div className='option'>
-                            <p>{currentPlayer[0]}</p>
-                        </div>
-                        {Object.entries(skillsFrom(currentPlayer)).map((skill, value) => (
-                                <div 
-                                    key={value} 
-                                    onClick={(setScreen(`skill`))}
-                                    className={`skill_item`}
-                                >
-                                    <p>{skill}</p>
-                                </div>
-                            ))}
-                    </div>
-                }
-                {
-                    (screen == 'skills') &&
-                    <div>
-                        <div className="skills">
-                            {Object.keys(skills).map((skill, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={(() => setCurrentSkill(skill),setScreen(`skill`))}
-                                    className={`skill-item`}
-                                >
-                                    <p>{skill}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                }
-                {
-                    (screen == 'skill') &&
-                    <div>
-                        <div className='option'>
-                            <p>{currentSkill}</p>
-                        </div>
-                        <div className="skills">
-                            {Object.values(currentSkill).map((player, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={(() => setCurrentPlayer(player),setScreen(`player`))}
-                                    className={`player-item`}
-                                >
-                                    <p>{player}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                }
-                {
-                    (screen == 'teamBuilder') &&
-                    <div>
-                        <div className='option'>
-                            <p>Seleccionar jugadores</p>
-                            <div className="player-selection">
-                                {players.map((player, index) => (
-                                    <div 
-                                        key={index} 
-                                        onClick={() => togglePlayerSelection(player)}
-                                        className={`player-item ${selectedPlayers.includes(player) ? 'selected' : ''}`}
-                                    >
-                                        {selectedPlayers.includes(player) && <Check size={20} />}
-                                        {player.Jugador}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className='content'>
-                                {teams.team1.length > 0 && (
-                                    <div className="teams-container">
-                                        <div className="team">
-                                            <h3>Equipo 1</h3>
-                                            {teams.team1.map((player, index) => (
-                                                <p key={index}>
-                                                    {player.Jugador}
-                                                </p>
-                                            ))}
-                                        </div>
-                                        
-                                        <div className="team">
-                                            <h3>Equipo 2</h3>
-                                            {teams.team2.map((player, index) => (
-                                                <p key={index}>
-                                                    {player.Jugador}
-                                                </p>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className='option' onClick={createTeams}>
-                            <p>Armar equipos</p>
-                        </div>
-                    </div>
-                }
+                )}
             </div>
-            <div className='tools'>
-                <div className='option'>
-                    <p>Exportar</p>
+            
+            
+            <div className='options'>
+                <div className='csv_handler'>
+                    <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileImport}
+                        id="fileInput"
+                        className="file-input"
+                    />
+                    <label htmlFor="fileInput" className="file-label">
+                        <Upload className="mr-2" /> Importar jugadores
+                    </label>
                 </div>
-                <div className='option'>
-                    <p>Guardar</p>
+                <div 
+                    onClick={createTeams} 
+                    className="create-teams-btn"
+                >
+                    <Users className="mr-2" />
+                    <p>Armar equipos</p>
                 </div>
             </div>
+
+            {teams.team1.length > 0 && (
+                <div className="copy-teams-container">
+                    <button 
+                        onClick={copyAllTeamsToClipboard}
+                        className="copy-teams-btn"
+                    >
+                        Copiar Todos los Jugadores
+                    </button>
+                </div>
+            )}
         </div>
     );
 };
