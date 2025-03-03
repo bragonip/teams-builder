@@ -10,7 +10,7 @@ const App = () => {
     const [teams, setTeams] = useState({ team1: [], team2: [] });
 
     const [screen, setScreen] = useState('main')
-    const [message, setMessage] = useState('')
+    const [message, setMessage] = useState('No hay suficientes jugadores.')
     const [currentPlayer, setCurrentPlayer] = useState([])
     const [currentSkill, setCurrentSkill] = useState('')
     const [skills, setSkills] = useState({})
@@ -64,39 +64,36 @@ const App = () => {
     const handleFileImport = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: (results) => {
-                if (results.data.length <= 1) {
-                    setMessage("El archivo CSV está vacío o no tiene jugadores");
-                    return;
+    
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const jsonData = JSON.parse(e.target.result);
+                
+                if (typeof jsonData !== "object" || Array.isArray(jsonData)) {
+                throw new Error();
                 }
-                
-                const columns = Object.keys(results.data[0]);
-                // Fix: Correct filter logic for player columns
-                const playerColumns = columns.filter(col => 
-                    col !== 'Jugador' && col !== 'categoria' && col !== 'Categoria'
-                );
-                
-                const importanceValues = results.data[0];
-                const importance = {};
-                playerColumns.forEach(col => {
-                    importance[col] = parseFloat(importanceValues[col]) || 1;
+        
+                for (const key in jsonData) {
+                if (!Array.isArray(jsonData[key])) {
+                    throw new Error();
+                }
+                jsonData[key].forEach(player => {
+                    if (typeof player !== "object" || !player.nombre || !player.categoria) {
+                    throw new Error();
+                    }
                 });
-                setSkillImportance(importance);
-
-                const actualPlayers = results.data.slice(1);
-                setPlayers(actualPlayers);
-                setMessage(null);
-            },
-            error: (error) => {
-                setMessage("Error al parsear el archivo CSV");
-                console.error("Error al parsear el archivo CSV:", error);
+                }
+        
+                setSkills(jsonData);
+                setMessage(""); // Clear error if valid
+            } catch {
+                setMessage("Invalid JSON format");
             }
-        });
+        };
+        reader.readAsText(file);
     };
+    
 
     const togglePlayerSelection = (player) => {
         setSelectedPlayers(prev => 
