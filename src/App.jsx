@@ -20,6 +20,44 @@ const App = () => {
     const [newPlayerCategory, setNewPlayerCategory] = useState("");
     const [newSkillName, setNewSkillName] = useState("");
     
+    // Estado para rastrear cambios sin guardar
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    
+    // Efecto para manejar la advertencia antes de salir de la página
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (hasUnsavedChanges) {
+                const message = "Tienes cambios sin guardar. Si sales de la página, perderás todos tus datos.";
+                e.returnValue = message;
+                return message;
+            }
+        };
+        
+        const handlePopState = (e) => {
+            if (hasUnsavedChanges) {
+                const confirmLeave = window.confirm("Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?");
+                if (!confirmLeave) {
+                    e.preventDefault();
+                    // Esto mantiene al usuario en la página actual
+                    window.history.pushState(null, "", window.location.pathname);
+                }
+            }
+        };
+
+        // Agregar event listeners
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+        
+        // Asegurarse de que hay un estado en el historial para detectar el botón atrás
+        window.history.pushState(null, "", window.location.pathname);
+        
+        // Limpiar event listeners al desmontar
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [hasUnsavedChanges]);
+    
     // Importar datos desde JSON
     const importSkillsFromJSON = (jsonString) => {
         try {
@@ -34,6 +72,7 @@ const App = () => {
             setPlayers(updatedPlayers);
             
             setMessage("Datos importados correctamente");
+            setHasUnsavedChanges(false);
             return true;
         } catch (error) {
             setMessage("Error al importar JSON: " + error.message);
@@ -93,6 +132,7 @@ const App = () => {
         setNewPlayerCategory("");
         setCreatingPlayer(false);
         setMessage("Jugador agregado correctamente");
+        setHasUnsavedChanges(true);
     };
 
     // Eliminar un jugador
@@ -120,6 +160,7 @@ const App = () => {
         setCurrentPlayer(null);
         setScreen('players');
         setMessage("Jugador eliminado correctamente");
+        setHasUnsavedChanges(true);
     };
 
     // Agregar una nueva habilidad
@@ -145,6 +186,7 @@ const App = () => {
         setNewSkillName("");
         setCreatingSkill(false);
         setMessage("Habilidad agregada correctamente");
+        setHasUnsavedChanges(true);
     };
 
     // Eliminar una habilidad
@@ -167,20 +209,39 @@ const App = () => {
         setCurrentSkill('');
         setScreen('skills');
         setMessage("Habilidad eliminada correctamente");
+        setHasUnsavedChanges(true);
     };
 
     // Exportar a JSON
     const exportSkillsToJSON = () => {
         try {
             const jsonData = JSON.stringify(skills, null, 2);
-            // En un caso real, aquí podrías usar la API de descarga del navegador
-            // o una librería como FileSaver.js para guardar el archivo
-            console.log(jsonData); // Por ahora solo lo mostramos en consola
-            setMessage("Datos exportados correctamente (revisa la consola)");
-            return jsonData;
+            
+            // Crear un objeto Blob con los datos JSON
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            
+            // Crear una URL para el Blob
+            const url = URL.createObjectURL(blob);
+            
+            // Crear un enlace temporal
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'team-skills-data.json';
+            
+            // Simular un clic en el enlace para descargar el archivo
+            document.body.appendChild(link);
+            link.click();
+            
+            // Limpiar
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            setMessage("Datos exportados correctamente");
+            setHasUnsavedChanges(false);
+            return true;
         } catch (error) {
             setMessage("Error al exportar: " + error.message);
-            return null;
+            return false;
         }
     };
 
@@ -223,6 +284,15 @@ const App = () => {
     const handleFileImport = (event) => {
         const file = event.target.files[0];
         if (file) {
+            // Verificar si hay cambios sin guardar antes de importar
+            if (hasUnsavedChanges) {
+                const confirmImport = window.confirm("Tienes cambios sin guardar. Si importas un archivo, perderás esos cambios. ¿Deseas continuar?");
+                if (!confirmImport) {
+                    event.target.value = ''; // Resetear el input de archivo
+                    return;
+                }
+            }
+            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const content = e.target.result;
@@ -239,6 +309,13 @@ const App = () => {
                     <div className="message">
                         <p>{message}</p>
                         <button onClick={() => setMessage('')}>×</button>
+                    </div>
+                )}
+                
+                {hasUnsavedChanges && (
+                    <div className="unsaved-warning">
+                        <p>⚠️ Tienes cambios sin guardar</p>
+                        <button onClick={exportSkillsToJSON}>Guardar ahora</button>
                     </div>
                 )}
                 
