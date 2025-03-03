@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const App = () => {
     // Estados para la navegación
@@ -61,25 +63,19 @@ const App = () => {
     // Importar datos desde JSON
     const importSkillsFromJSON = (jsonString) => {
         try {
-            // Parsea el JSON a objeto JavaScript
             const importedSkills = JSON.parse(jsonString);
-            
-            // Actualiza el objeto skills
             setSkills(importedSkills);
-            
-            // Actualiza la lista de jugadores
-            const updatedPlayers = updatePlayersList(importedSkills);
-            setPlayers(updatedPlayers);
-            
-            setMessage("Datos importados correctamente");
+            setPlayers(updatePlayersList(importedSkills));
             setHasUnsavedChanges(false);
+            
+            toast.success("Datos importados correctamente");
             return true;
         } catch (error) {
-            setMessage("Error al importar JSON: " + error.message);
+            toast.error("Error al importar JSON: " + error.message);
             return false;
         }
     };
-
+    
     // Actualizar lista de jugadores basado en las habilidades
     const updatePlayersList = (skillsData = skills) => {
         // Set para evitar duplicados
@@ -304,30 +300,22 @@ const App = () => {
 
     return (
         <div className='app'>
+            <ToastContainer position="top-right" autoClose={3000} />
             <div className='main_screen'>
-                {message && (
-                    <div className="message">
-                        <p>{message}</p>
-                        <button onClick={() => setMessage('')}>×</button>
-                    </div>
-                )}
-                
                 {hasUnsavedChanges && (
                     <div className="unsaved-warning">
                         <p>⚠️ Tienes cambios sin guardar</p>
                         <button onClick={exportSkillsToJSON}>Guardar ahora</button>
                     </div>
-                )}
-                
+                )}      
                 {/* Pantalla Principal */}
                 {screen === 'main' && (
                     <div>
-                        <h1>Gestión de Equipos</h1>
-                        <div className='option' onClick={() => handleSetScreen('players')}>
-                            <p>Jugadores</p>
-                        </div>
                         <div className='option' onClick={() => handleSetScreen('skills')}>
                             <p>Habilidades</p>
+                        </div>
+                        <div className='option' onClick={() => handleSetScreen('players')}>
+                            <p>Jugadores</p>
                         </div>
                         <div className='import'>
                             <p>Importar datos</p>
