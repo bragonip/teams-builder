@@ -1,11 +1,3 @@
-.player-item {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: 5px;
-    margin: 2px 0;
-    color: black;
-}
 
 .player-item.selected {
     background-color: darkolivegreen;
