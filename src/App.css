@@ -75,16 +75,11 @@
   }
   
   .player-item {
-    position: relative;
     display: flex;
-    align-items: center;
-    padding: 12px;
-    margin-bottom: 8px;
-    background-color: white;
-    border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    cursor: grab;
-    transition: background-color 0.2s, box-shadow 0.2s;
+    flex-direction: row;
+    align-items: center; /* Centra verticalmente los elementos */
+    gap: 10px; /* Espacio entre los elementos */
+    /* Otros estilos que desees aplicar por defecto */
   }
   
   .player-item:hover {
@@ -92,13 +87,9 @@
   }
   
   .player-item.dragging {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between; /* Distribuye los elementos con espacio entre ellos */
-    align-items: center; /* Centra los elementos verticalmente */
-    gap: 10px; /* Agrega espacio entre los elementos */
     background-color: #e8f4ff;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Sombra mejorada */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    /* Puedes agregar o modificar otros estilos específicos para el arrastre */
   }
   
   .drag-handle {
@@ -119,7 +110,13 @@
     font-weight: bold;
   }
   
-
+  .drag-handle {
+    position: absolute;
+    right: 10px;
+    color: #999;
+    cursor: grab;
+    font-size: 18px;
+  }
   
   .drag-instructions {
     color: #666;
