@@ -94,10 +94,18 @@
   .player-item.dragging {
     display: flex;
     flex-direction: row;
+    justify-content: space-between; /* Distribuye los elementos con espacio entre ellos */
+    align-items: center; /* Centra los elementos verticalmente */
+    gap: 10px; /* Agrega espacio entre los elementos */
     background-color: #e8f4ff;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Sombra mejorada */
   }
   
+  .drag-handle {
+      cursor: grab;
+      font-size: 1.5em;
+      padding: 5px;
+  }
   .rank {
     display: inline-flex;
     justify-content: center;
@@ -111,13 +119,7 @@
     font-weight: bold;
   }
   
-  .drag-handle {
-    position: absolute;
-    right: 10px;
-    color: #999;
-    cursor: grab;
-    font-size: 18px;
-  }
+
   
   .drag-instructions {
     color: #666;
