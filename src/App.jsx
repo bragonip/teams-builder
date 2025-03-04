@@ -332,6 +332,9 @@ const App = () => {
         <div className='app'>
             <ToastContainer position="top-right" autoClose={4500} />
             <div className='main_screen'>
+                <div className='back-button' onClick={() => handleSetScreen('main')}>
+                    <p>Volver</p>
+                </div>
                 {/* Pantalla Principal */}
                 {screen === 'main' && (
                     <div>
@@ -351,9 +354,6 @@ const App = () => {
                 {screen === 'players' && (
                     <div>
                         <h2>Jugadores</h2>
-                        <div className='back-button' onClick={() => handleSetScreen('main')}>
-                            <p>Volver</p>
-                        </div>
                         <div className='import'>
                             <p>Importar datos</p>
                             <input 
@@ -439,9 +439,6 @@ const App = () => {
                 {screen === 'skills' && (
                     <div>
                         <h2>Habilidades</h2>
-                        <div className='back-button' onClick={() => handleSetScreen('main')}>
-                            <p>Volver</p>
-                        </div>
                         
                         {!creatingSkill ? (
                             <div className='create-button' onClick={() => setCreatingSkill(true)}>
@@ -483,12 +480,7 @@ const App = () => {
                 {/* Pantalla de Habilidad Individual */}
                 {screen === 'skill' && currentSkill && skills[currentSkill] && (
                     <div>
-                        <h2>Habilidad: {currentSkill}</h2>
-                        
-                        <div className='back-button' onClick={() => handleSetScreen('skills')}>
-                            <p>Volver</p>
-                        </div>
-                        
+                        <h2>Habilidad: {currentSkill}</h2>                        
                         <div className='delete-button' onClick={() => removeSkill(currentSkill)}>
                             <p>Eliminar habilidad</p>
                         </div>
@@ -524,7 +516,7 @@ const App = () => {
                                                             }
                                                         }}
                                                     >
-                                                        <span className="rank">{index + 1}</span>
+                                                        <div className="drag-handle">⋮⋮</div>
                                                         <p>{player.name} ({player.categoria})</p>
                                                         <div className="drag-handle">⋮⋮</div>
                                                     </div>
