@@ -69,7 +69,6 @@
   .player-item {
     display: flex;
     flex-direction: row;
-    align-items: center; /* Centra verticalmente los elementos */
     gap: 10px; /* Espacio entre los elementos */
     /* Otros estilos que desees aplicar por defecto */
   }
