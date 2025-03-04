@@ -98,16 +98,20 @@ const App = () => {
 
     // Agregar un nuevo jugador
     const addPlayer = () => {
-        if (!newPlayerName || !newPlayerCategory) {
-            setMessage("name y categoría son obligatorios");
+        // Limpiar y convertir a mayúsculas el nombre y la categoría
+        const cleanedName = newPlayerName.trim().toUpperCase();
+        const cleanedCategory = newPlayerCategory.trim().toUpperCase();
+    
+        if (!cleanedName || !cleanedCategory) {
+            setMessage("Nombre y categoría son obligatorios");
             return;
         }
         
-        const newPlayer = { name: newPlayerName, categoria: newPlayerCategory };
+        const newPlayer = { name: cleanedName, category: cleanedCategory };
         
         // Verifica si el jugador ya existe
         const playerExists = players.some(
-            player => player.name === newPlayerName && player.categoria === newPlayerCategory
+            player => player.name === cleanedName && player.category === cleanedCategory
         );
         
         if (playerExists) {
@@ -143,13 +147,13 @@ const App = () => {
         // Elimina el jugador de cada habilidad
         Object.keys(updatedSkills).forEach(skill => {
             updatedSkills[skill] = updatedSkills[skill].filter(
-                p => !(p.name === player.name && p.categoria === player.categoria)
+                p => !(p.name === player.name && p.category === player.category)
             );
         });
         
         // Actualiza la lista de jugadores
         const updatedPlayers = players.filter(
-            p => !(p.name === player.name && p.categoria === player.categoria)
+            p => !(p.name === player.name && p.category === player.category)
         );
         
         // Actualiza estados
@@ -163,12 +167,15 @@ const App = () => {
 
     // Agregar una nueva habilidad
     const addSkill = () => {
-        if (!newSkillName) {
-            setMessage("El name de la habilidad es obligatorio");
+        // Limpiar y convertir a mayúsculas el nombre de la habilidad
+        const cleanedSkillName = newSkillName.trim().toUpperCase();
+    
+        if (!cleanedSkillName) {
+            setMessage("El nombre de la habilidad es obligatorio");
             return;
         }
         
-        if (skills[newSkillName]) {
+        if (skills[cleanedSkillName]) {
             setMessage("La habilidad ya existe");
             return;
         }
@@ -177,7 +184,7 @@ const App = () => {
         const updatedSkills = { ...skills };
         
         // Agrega la habilidad con todos los jugadores
-        updatedSkills[newSkillName] = [...players];
+        updatedSkills[cleanedSkillName] = [...players];
         
         // Actualiza estados
         setSkills(updatedSkills);
@@ -248,7 +255,7 @@ const App = () => {
         if (!skills[skillName]) return -1;
         
         return skills[skillName].findIndex(
-            p => p.name === player.name && p.categoria === player.categoria
+            p => p.name === player.name && p.category === player.category
         ) + 1; // +1 para mostrar posición desde 1 en lugar de desde 0
     };
 
@@ -415,7 +422,7 @@ const App = () => {
                 {screen === 'player' && currentPlayer && (
                     <div>
                         <h2>Jugador: {currentPlayer.name}</h2>
-                        <p>Categoría: {currentPlayer.categoria}</p>
+                        <p>Categoría: {currentPlayer.category}</p>
 
                         <div className='delete-button' onClick={() => removePlayer(currentPlayer)}>
                             <p>Eliminar jugador</p>
@@ -499,8 +506,8 @@ const App = () => {
                                     >
                                         {skills[currentSkill].map((player, index) => (
                                             <Draggable 
-                                                key={`${player.name}-${player.categoria}`}
-                                                draggableId={`${player.name}-${player.categoria}`}
+                                                key={`${player.name}-${player.category}`}
+                                                draggableId={`${player.name}-${player.category}`}
                                                 index={index}
                                             >
                                                 {(provided, snapshot) => (
@@ -517,8 +524,7 @@ const App = () => {
                                                             }
                                                         }}
                                                     >
-                                                        <div className="drag-handle">⋮⋮</div>
-                                                        <p>{player.name} ({player.categoria})</p>
+                                                        <p>{player.name}</p>
                                                         <div className="drag-handle">⋮⋮</div>
                                                     </div>
                                                 )}
