@@ -69,6 +69,7 @@
   .player-item {
     display: flex;
     flex-direction: row;
+    color: red;
     gap: 10px; /* Espacio entre los elementos */
     /* Otros estilos que desees aplicar por defecto */
   }
