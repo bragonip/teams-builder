@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 const App = () => {
     // Estados para la navegación
@@ -97,15 +98,15 @@ const App = () => {
     // Agregar un nuevo jugador
     const addPlayer = () => {
         if (!newPlayerName || !newPlayerCategory) {
-            setMessage("Nombre y categoría son obligatorios");
+            setMessage("name y categoría son obligatorios");
             return;
         }
         
-        const newPlayer = { nombre: newPlayerName, categoria: newPlayerCategory };
+        const newPlayer = { name: newPlayerName, categoria: newPlayerCategory };
         
         // Verifica si el jugador ya existe
         const playerExists = players.some(
-            player => player.nombre === newPlayerName && player.categoria === newPlayerCategory
+            player => player.name === newPlayerName && player.categoria === newPlayerCategory
         );
         
         if (playerExists) {
@@ -141,13 +142,13 @@ const App = () => {
         // Elimina el jugador de cada habilidad
         Object.keys(updatedSkills).forEach(skill => {
             updatedSkills[skill] = updatedSkills[skill].filter(
-                p => !(p.nombre === player.nombre && p.categoria === player.categoria)
+                p => !(p.name === player.name && p.categoria === player.categoria)
             );
         });
         
         // Actualiza la lista de jugadores
         const updatedPlayers = players.filter(
-            p => !(p.nombre === player.nombre && p.categoria === player.categoria)
+            p => !(p.name === player.name && p.categoria === player.categoria)
         );
         
         // Actualiza estados
@@ -162,7 +163,7 @@ const App = () => {
     // Agregar una nueva habilidad
     const addSkill = () => {
         if (!newSkillName) {
-            setMessage("El nombre de la habilidad es obligatorio");
+            setMessage("El name de la habilidad es obligatorio");
             return;
         }
         
@@ -246,7 +247,7 @@ const App = () => {
         if (!skills[skillName]) return -1;
         
         return skills[skillName].findIndex(
-            p => p.nombre === player.nombre && p.categoria === player.categoria
+            p => p.name === player.name && p.categoria === player.categoria
         ) + 1; // +1 para mostrar posición desde 1 en lugar de desde 0
     };
 
@@ -298,16 +299,39 @@ const App = () => {
         }
     };
 
+    // Función para manejar la finalización de un drag and drop
+    const handleDragEnd = (result) => {
+        // Si no hay destino o la caída no es válida, no hacemos nada
+        if (!result.destination) return;
+
+        // Si es la misma posición, no hacemos nada
+        if (result.destination.index === result.source.index) return;
+
+        // Obtener skill actual
+        if (!currentSkill || !skills[currentSkill]) return;
+
+        // Crear una copia de los jugadores en la habilidad actual
+        const skillPlayers = [...skills[currentSkill]];
+
+        // Reordenar la lista (mover jugador de una posición a otra)
+        const [movedPlayer] = skillPlayers.splice(result.source.index, 1);
+        skillPlayers.splice(result.destination.index, 0, movedPlayer);
+
+        // Actualizar el estado con la nueva posición
+        const updatedSkills = {
+            ...skills,
+            [currentSkill]: skillPlayers
+        };
+
+        setSkills(updatedSkills);
+        setHasUnsavedChanges(true);
+        toast.success("Orden actualizado");
+    };
+
     return (
         <div className='app'>
-            <ToastContainer position="top-right" autoClose={3000} />
+            <ToastContainer position="top-right" autoClose={4500} />
             <div className='main_screen'>
-                {hasUnsavedChanges && (
-                    <div className="unsaved-warning">
-                        <p>⚠️ Tienes cambios sin guardar</p>
-                        <button onClick={exportSkillsToJSON}>Guardar ahora</button>
-                    </div>
-                )}      
                 {/* Pantalla Principal */}
                 {screen === 'main' && (
                     <div>
@@ -316,6 +340,19 @@ const App = () => {
                         </div>
                         <div className='option' onClick={() => handleSetScreen('players')}>
                             <p>Jugadores</p>
+                        </div>
+                        <div className='option'>
+                            <p>Equipos</p>
+                        </div>
+                    </div>
+                )}
+                
+                {/* Pantalla de Jugadores */}
+                {screen === 'players' && (
+                    <div>
+                        <h2>Jugadores</h2>
+                        <div className='back-button' onClick={() => handleSetScreen('main')}>
+                            <p>Volver</p>
                         </div>
                         <div className='import'>
                             <p>Importar datos</p>
@@ -327,16 +364,6 @@ const App = () => {
                         </div>
                         <div className='export' onClick={exportSkillsToJSON}>
                             <p>Exportar datos</p>
-                        </div>
-                    </div>
-                )}
-                
-                {/* Pantalla de Jugadores */}
-                {screen === 'players' && (
-                    <div>
-                        <h2>Jugadores</h2>
-                        <div className='back-button' onClick={() => handleSetScreen('main')}>
-                            <p>Volver</p>
                         </div>
                         
                         {!creatingPlayer ? (
@@ -374,9 +401,9 @@ const App = () => {
                                 <div 
                                     key={index} 
                                     onClick={() => handleSetScreen('player', player)}
-                                    className="player-item"
+                                    className="players-list-item"
                                 >
-                                    <p>{player.nombre} ({player.categoria})</p>
+                                    <p>{player.name}</p>
                                 </div>
                             ))}
                         </div>
@@ -386,13 +413,9 @@ const App = () => {
                 {/* Pantalla de Jugador Individual */}
                 {screen === 'player' && currentPlayer && (
                     <div>
-                        <h2>Jugador: {currentPlayer.nombre}</h2>
+                        <h2>Jugador: {currentPlayer.name}</h2>
                         <p>Categoría: {currentPlayer.categoria}</p>
-                        
-                        <div className='back-button' onClick={() => handleSetScreen('players')}>
-                            <p>Volver</p>
-                        </div>
-                        
+
                         <div className='delete-button' onClick={() => removePlayer(currentPlayer)}>
                             <p>Eliminar jugador</p>
                         </div>
@@ -428,7 +451,7 @@ const App = () => {
                             <div className='create-form'>
                                 <input
                                     type="text"
-                                    placeholder="Nombre de la habilidad"
+                                    placeholder="name de la habilidad"
                                     value={newSkillName}
                                     onChange={(e) => setNewSkillName(e.target.value)}
                                 />
@@ -471,18 +494,48 @@ const App = () => {
                         </div>
                         
                         <h3>Ranking de jugadores</h3>
-                        <div className="players-list ranked">
-                            {skills[currentSkill].map((player, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={() => handleSetScreen('player', player)}
-                                    className="player-item"
-                                >
-                                    <span className="rank">{index + 1}</span>
-                                    <p>{player.nombre} ({player.categoria})</p>
-                                </div>
-                            ))}
-                        </div>
+                        <p className="drag-instructions">Arrastra los jugadores para cambiar su posición</p>
+                        
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <Droppable droppableId={`skill-${currentSkill}`}>
+                                {(provided) => (
+                                    <div 
+                                        className="players-list ranked"
+                                        ref={provided.innerRef}
+                                        {...provided.droppableProps}
+                                    >
+                                        {skills[currentSkill].map((player, index) => (
+                                            <Draggable 
+                                                key={`${player.name}-${player.categoria}`}
+                                                draggableId={`${player.name}-${player.categoria}`}
+                                                index={index}
+                                            >
+                                                {(provided, snapshot) => (
+                                                    <div 
+                                                        className={`player-item ${snapshot.isDragging ? 'dragging' : ''}`}
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        onClick={(e) => {
+                                                            // Solo navegamos al jugador si no estamos arrastrando
+                                                            if (!snapshot.isDragging) {
+                                                                e.stopPropagation();
+                                                                handleSetScreen('player', player);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <span className="rank">{index + 1}</span>
+                                                        <p>{player.name} ({player.categoria})</p>
+                                                        <div className="drag-handle">⋮⋮</div>
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
                     </div>
                 )}
             </div>

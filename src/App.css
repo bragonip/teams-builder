@@ -66,3 +66,71 @@
   input[type="range"] {
     accent-color: #4f46e5;
   }
+
+/* Estilos para el drag and drop */
+.players-list.ranked {
+    padding: 8px;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+  }
+  
+  .player-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: grab;
+    transition: background-color 0.2s, box-shadow 0.2s;
+  }
+  
+  .player-item:hover {
+    background-color: #f5f5f5;
+  }
+  
+  .player-item.dragging {
+    background-color: #e8f4ff;
+    box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+  }
+  
+  .rank {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 24px;
+    height: 24px;
+    background-color: #3498db;
+    color: white;
+    border-radius: 50%;
+    margin-right: 12px;
+    font-weight: bold;
+  }
+  
+  .drag-handle {
+    position: absolute;
+    right: 10px;
+    color: #999;
+    cursor: grab;
+    font-size: 18px;
+  }
+  
+  .drag-instructions {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+  
+  /* Ajustes para la interacción táctil */
+  @media (max-width: 768px) {
+    .player-item {
+      padding: 14px 12px;
+    }
+    
+    .drag-handle {
+      font-size: 20px;
+      padding: 8px;
+    }
+  }
