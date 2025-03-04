@@ -92,6 +92,7 @@
   }
   
   .player-item.dragging {
+    display: inline-block;
     background-color: #e8f4ff;
     box-shadow: 0 5px 10px rgba(0,0,0,0.15);
   }
