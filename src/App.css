@@ -1,3 +1,11 @@
+.player-item {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 5px;
+    margin: 2px 0;
+    color: black;
+}
 
 .player-item.selected {
     background-color: darkolivegreen;
@@ -69,7 +77,7 @@
   .player-item {
     display: flex;
     flex-direction: row;
-    color: red;
+    align-items: center; /* Centra verticalmente los elementos */
     gap: 10px; /* Espacio entre los elementos */
     /* Otros estilos que desees aplicar por defecto */
   }
@@ -79,9 +87,13 @@
   }
   
   .player-item.dragging {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between; /* Distribuye los elementos con espacio entre ellos */
+    align-items: center; /* Centra los elementos verticalmente */
+    gap: 10px; /* Agrega espacio entre los elementos */
     background-color: #e8f4ff;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    /* Puedes agregar o modificar otros estilos específicos para el arrastre */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Sombra mejorada */
   }
   
   .drag-handle {
