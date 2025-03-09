@@ -1,385 +1,542 @@
-import React, { useEffect, useState } from 'react';
-import { Upload, Users, Check } from 'lucide-react';
-import Papa from 'papaparse';
+import React, { useState, useEffect } from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import './App.css';
 
 const App = () => {
+    // Estados para la navegación
+    const [screen, setScreen] = useState('main');
+    const [message, setMessage] = useState('');
+    
+    // Estados para los datos
+    const [skills, setSkills] = useState({});
     const [players, setPlayers] = useState([]);
-    const [selectedPlayers, setSelectedPlayers] = useState([]);
-    const [skillImportance, setSkillImportance] = useState({});
-    const [teams, setTeams] = useState({ team1: [], team2: [] });
-
-    const [screen, setScreen] = useState('main')
-    const [message, setMessage] = useState('No hay suficientes jugadores.')
-    const [currentPlayer, setCurrentPlayer] = useState([])
-    const [currentSkill, setCurrentSkill] = useState('')
-    const [skills, setSkills] = useState({})
-    const [creatingPlayer, setCreatingPlayer] = useState(false)
+    
+    // Estados para selección actual
+    const [currentPlayer, setCurrentPlayer] = useState(null);
+    const [currentSkill, setCurrentSkill] = useState('');
+    
+    // Estados para creación de nuevos elementos
+    const [creatingPlayer, setCreatingPlayer] = useState(false);
+    const [creatingSkill, setCreatingSkill] = useState(false);
     const [newPlayerName, setNewPlayerName] = useState("");
     const [newPlayerCategory, setNewPlayerCategory] = useState("");
+    const [newSkillName, setNewSkillName] = useState("");
     
-
-    const setAppHeight = () => {
-        const app = document.querySelector('.app');
-        if (app) app.style.height = `${window.innerHeight}px`;
-    };
-
-    const addSkill = (skillName) => {
-        skills.set(skillName,players)
-    }
-    const deleteSkill = (skillName) => {
-        skills.delete(skillName)
-    }
+    // Estado para rastrear cambios sin guardar
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     
-    const addPlayer = (player) => {
-        Object.keys(skills).forEach((skill) => {
-            skills[skill] = [player, ...skills[skill]];
-        });
-    };
-
-    const removePlayer = (player) => {
-        Object.keys(skills).forEach((skill) => {
-            skills[skill] = skills[skill].filter((player) => player !== player);
-        });
-    };
-
-    const skillsFrom = (player) => {
-        const result = {};
-        Object.entries(skills).forEach(([skill, players]) => {
-            const index = players.indexOf(player);
-            if (index !== -1) {
-                result[skill] = index;
-            }
-        });
-        return result;
-    };
-
-    const skillsHaveSamePlayers = () => {
-        return Object.values(skills).every(skillPlayers => {
-            return new Set(skillPlayers).size === players.length
-                && players.every(p => skillPlayers.includes(p))
-        });
-    };
-        
-    const handleFileImport = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-    
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const jsonData = JSON.parse(e.target.result);
-                
-                if (typeof jsonData !== "object" || Array.isArray(jsonData)) {
-                throw new Error();
-                }
-        
-                for (const key in jsonData) {
-                if (!Array.isArray(jsonData[key])) {
-                    throw new Error();
-                }
-                jsonData[key].forEach(player => {
-                    if (typeof player !== "object" || !player.nombre || !player.categoria) {
-                    throw new Error();
-                    }
-                });
-                }
-        
-                setSkills(jsonData);
-                setMessage(""); // Clear error if valid
-            } catch {
-                setMessage("Invalid JSON format");
+    // Efecto para manejar la advertencia antes de salir de la página
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (hasUnsavedChanges) {
+                const message = "Tienes cambios sin guardar. Si sales de la página, perderás todos tus datos.";
+                e.returnValue = message;
+                return message;
             }
         };
-        reader.readAsText(file);
-    };
+        
+        const handlePopState = (e) => {
+            if (hasUnsavedChanges) {
+                const confirmLeave = window.confirm("Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?");
+                if (!confirmLeave) {
+                    e.preventDefault();
+                    // Esto mantiene al usuario en la página actual
+                    window.history.pushState(null, "", window.location.pathname);
+                }
+            }
+        };
+
+        // Agregar event listeners
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        window.addEventListener('popstate', handlePopState);
+        
+        // Asegurarse de que hay un estado en el historial para detectar el botón atrás
+        window.history.pushState(null, "", window.location.pathname);
+        
+        // Limpiar event listeners al desmontar
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [hasUnsavedChanges]);
     
-
-    const togglePlayerSelection = (player) => {
-        setSelectedPlayers(prev => 
-            prev.includes(player)
-                ? prev.filter(p => p !== player)
-                : [...prev, player]
-        );
-    };
-
-    const createTeams = () => {
-        if (selectedPlayers.length < 2) {
-            setMessage("Selecciona al menos 2 jugadores");
-            return;
+    // Importar datos desde JSON
+    const importSkillsFromJSON = (jsonString) => {
+        try {
+            const importedSkills = JSON.parse(jsonString);
+            setSkills(importedSkills);
+            setPlayers(updatePlayersList(importedSkills));
+            setHasUnsavedChanges(false);
+            
+            toast.success("Datos importados correctamente");
+            return true;
+        } catch (error) {
+            toast.error("Error al importar JSON: " + error.message);
+            return false;
         }
+    };
     
-        const skillColumns = Object.keys(skillImportance);
+    // Actualizar lista de jugadores basado en las habilidades
+    const updatePlayersList = (skillsData = skills) => {
+        // Set para evitar duplicados
+        const uniquePlayers = new Set();
         
-        // Calculate player scores
-        const calculatePlayerScore = (player) => {
-            return skillColumns.reduce((score, col) => {
-                const skillImportanceValue = skillImportance[col];
-                const skillValue = parseFloat(player[col] || 0);
-                return score + (skillValue * skillImportanceValue);
-            }, 0);
-        };
-    
-        // Add scores to all players
-        const playersWithScores = selectedPlayers.map(player => ({
-            ...player,
-            score: calculatePlayerScore(player)
-        }));
-    
-        // Randomly select first players for each team
-        const team1 = [];
-        const team2 = [];
-        let team1Score = 0;
-        let team2Score = 0;
-    
-        // Random selection for first player in team 1
-        const randomIndex1 = Math.floor(Math.random() * playersWithScores.length);
-        const firstTeam1Player = playersWithScores[randomIndex1];
-        team1.push(firstTeam1Player);
-        team1Score += firstTeam1Player.score;
-    
-        // Remove first player from the pool
-        const remainingPlayers = playersWithScores.filter((_, index) => index !== randomIndex1);
-    
-        // Random selection for first player in team 2
-        const randomIndex2 = Math.floor(Math.random() * remainingPlayers.length);
-        const firstTeam2Player = remainingPlayers[randomIndex2];
-        team2.push(firstTeam2Player);
-        team2Score += firstTeam2Player.score;
-    
-        // Remove second player from the pool
-        const finalRemainingPlayers = remainingPlayers.filter((_, index) => index !== randomIndex2);
-    
-        // Group remaining players by category
-        const playersByCategory = {};
-        finalRemainingPlayers.forEach(player => {
-            const category = player.categoria || 'Sin categoria';
-            if (!playersByCategory[category]) {
-                playersByCategory[category] = [];
-            }
-            playersByCategory[category].push(player);
-        });
-    
-        // Helper function to get the count of a category in a team
-        const getCategoryCount = (team, category) => {
-            return team.filter(player => 
-                (player.categoria || 'Sin categoria') === category
-            ).length;
-        };
-    
-        // Distribute remaining players category by category
-        Object.values(playersByCategory).forEach(categoryPlayers => {
-            categoryPlayers.forEach(player => {
-                const category = player.categoria || 'Sin categoria';
-                const team1CategoryCount = getCategoryCount(team1, category);
-                const team2CategoryCount = getCategoryCount(team2, category);
-    
-                if (team1CategoryCount <= team2CategoryCount && team1Score <= team2Score) {
-                    team1.push(player);
-                    team1Score += player.score;
-                } else {
-                    team2.push(player);
-                    team2Score += player.score;
-                }
+        // Recorre todas las habilidades
+        Object.values(skillsData).forEach(playersInSkill => {
+            playersInSkill.forEach(player => {
+                // Usamos JSON.stringify para convertir el objeto en string y poder compararlo
+                uniquePlayers.add(JSON.stringify(player));
             });
         });
-    
-        setTeams({ team1, team2 });
+        
+        // Convierte de nuevo a objetos
+        const updatedPlayers = Array.from(uniquePlayers).map(playerStr => JSON.parse(playerStr));
+        return updatedPlayers;
     };
 
-    useEffect(() => {
-        setAppHeight();
-        window.addEventListener('resize', setAppHeight);
-        return () => window.removeEventListener('resize', setAppHeight);
-    }, []);
+    // Agregar un nuevo jugador
+    const addPlayer = () => {
+        // Limpiar y convertir a mayúsculas el nombre y la categoría
+        const cleanedName = newPlayerName.trim().toUpperCase();
+        const cleanedCategory = newPlayerCategory.trim().toUpperCase();
+    
+        if (!cleanedName || !cleanedCategory) {
+            setMessage("Nombre y categoría son obligatorios");
+            return;
+        }
+        
+        const newPlayer = { name: cleanedName, category: cleanedCategory };
+        
+        // Verifica si el jugador ya existe
+        const playerExists = players.some(
+            player => player.name === cleanedName && player.category === cleanedCategory
+        );
+        
+        if (playerExists) {
+            setMessage("El jugador ya existe");
+            return;
+        }
+        
+        // Crear copia del estado actual
+        const updatedSkills = { ...skills };
+        
+        // Agrega el jugador a cada habilidad (al final)
+        Object.keys(updatedSkills).forEach(skill => {
+            updatedSkills[skill].push(newPlayer);
+        });
+        
+        // Actualiza estados
+        setSkills(updatedSkills);
+        setPlayers([...players, newPlayer]);
+        setNewPlayerName("");
+        setNewPlayerCategory("");
+        setCreatingPlayer(false);
+        setMessage("Jugador agregado correctamente");
+        setHasUnsavedChanges(true);
+    };
+
+    // Eliminar un jugador
+    const removePlayer = (player) => {
+        if (!player) return;
+        
+        // Crear copia del estado actual
+        const updatedSkills = { ...skills };
+        
+        // Elimina el jugador de cada habilidad
+        Object.keys(updatedSkills).forEach(skill => {
+            updatedSkills[skill] = updatedSkills[skill].filter(
+                p => !(p.name === player.name && p.category === player.category)
+            );
+        });
+        
+        // Actualiza la lista de jugadores
+        const updatedPlayers = players.filter(
+            p => !(p.name === player.name && p.category === player.category)
+        );
+        
+        // Actualiza estados
+        setSkills(updatedSkills);
+        setPlayers(updatedPlayers);
+        setCurrentPlayer(null);
+        setScreen('players');
+        setMessage("Jugador eliminado correctamente");
+        setHasUnsavedChanges(true);
+    };
+
+    // Agregar una nueva habilidad
+    const addSkill = () => {
+        // Limpiar y convertir a mayúsculas el nombre de la habilidad
+        const cleanedSkillName = newSkillName.trim().toUpperCase();
+    
+        if (!cleanedSkillName) {
+            setMessage("El nombre de la habilidad es obligatorio");
+            return;
+        }
+        
+        if (skills[cleanedSkillName]) {
+            setMessage("La habilidad ya existe");
+            return;
+        }
+        
+        // Crear copia del estado actual
+        const updatedSkills = { ...skills };
+        
+        // Agrega la habilidad con todos los jugadores
+        updatedSkills[cleanedSkillName] = [...players];
+        
+        // Actualiza estados
+        setSkills(updatedSkills);
+        setNewSkillName("");
+        setCreatingSkill(false);
+        setMessage("Habilidad agregada correctamente");
+        setHasUnsavedChanges(true);
+    };
+
+    // Eliminar una habilidad
+    const removeSkill = (skillName) => {
+        if (!skillName) return;
+        
+        if (!skills[skillName]) {
+            setMessage("Habilidad no encontrada");
+            return;
+        }
+        
+        // Crear copia del estado actual
+        const updatedSkills = { ...skills };
+        
+        // Elimina la habilidad
+        delete updatedSkills[skillName];
+        
+        // Actualiza estados
+        setSkills(updatedSkills);
+        setCurrentSkill('');
+        setScreen('skills');
+        setMessage("Habilidad eliminada correctamente");
+        setHasUnsavedChanges(true);
+    };
+
+    // Exportar a JSON
+    const exportSkillsToJSON = () => {
+        try {
+            const jsonData = JSON.stringify(skills, null, 2);
+            
+            // Crear un objeto Blob con los datos JSON
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            
+            // Crear una URL para el Blob
+            const url = URL.createObjectURL(blob);
+            
+            // Crear un enlace temporal
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'team-skills-data.json';
+            
+            // Simular un clic en el enlace para descargar el archivo
+            document.body.appendChild(link);
+            link.click();
+            
+            // Limpiar
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            setMessage("Datos exportados correctamente");
+            setHasUnsavedChanges(false);
+            return true;
+        } catch (error) {
+            setMessage("Error al exportar: " + error.message);
+            return false;
+        }
+    };
+
+    // Obtener posición del jugador en una habilidad (para mostrar su nivel)
+    const getPlayerRankInSkill = (player, skillName) => {
+        if (!skills[skillName]) return -1;
+        
+        return skills[skillName].findIndex(
+            p => p.name === player.name && p.category === player.category
+        ) + 1; // +1 para mostrar posición desde 1 en lugar de desde 0
+    };
+
+    // Obtener habilidades de un jugador con su ranking
+    const getPlayerSkills = (player) => {
+        if (!player) return {};
+        
+        const playerSkills = {};
+        
+        Object.keys(skills).forEach(skillName => {
+            const rank = getPlayerRankInSkill(player, skillName);
+            if (rank > 0) {
+                playerSkills[skillName] = rank;
+            }
+        });
+        
+        return playerSkills;
+    };
+
+    // Manejar el cambio de pantalla
+    const handleSetScreen = (newScreen, data = null) => {
+        if (newScreen === 'player' && data) {
+            setCurrentPlayer(data);
+        } else if (newScreen === 'skill' && data) {
+            setCurrentSkill(data);
+        }
+        setScreen(newScreen);
+    };
+
+    // Importar archivo JSON
+    const handleFileImport = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Verificar si hay cambios sin guardar antes de importar
+            if (hasUnsavedChanges) {
+                const confirmImport = window.confirm("Tienes cambios sin guardar. Si importas un archivo, perderás esos cambios. ¿Deseas continuar?");
+                if (!confirmImport) {
+                    event.target.value = ''; // Resetear el input de archivo
+                    return;
+                }
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const content = e.target.result;
+                importSkillsFromJSON(content);
+            };
+            reader.readAsText(file);
+        }
+    };
+
+    // Función para manejar la finalización de un drag and drop
+    const handleDragEnd = (result) => {
+        // Si no hay destino o la caída no es válida, no hacemos nada
+        if (!result.destination) return;
+
+        // Si es la misma posición, no hacemos nada
+        if (result.destination.index === result.source.index) return;
+
+        // Obtener skill actual
+        if (!currentSkill || !skills[currentSkill]) return;
+
+        // Crear una copia de los jugadores en la habilidad actual
+        const skillPlayers = [...skills[currentSkill]];
+
+        // Reordenar la lista (mover jugador de una posición a otra)
+        const [movedPlayer] = skillPlayers.splice(result.source.index, 1);
+        skillPlayers.splice(result.destination.index, 0, movedPlayer);
+
+        // Actualizar el estado con la nueva posición
+        const updatedSkills = {
+            ...skills,
+            [currentSkill]: skillPlayers
+        };
+
+        setSkills(updatedSkills);
+        setHasUnsavedChanges(true);
+        toast.success("Orden actualizado");
+    };
 
     return (
         <div className='app'>
-            <div className='notification_bar'>
-                <p className='message'>{message}</p>
-            </div>
+            <ToastContainer position="top-right" autoClose={4500} />
             <div className='main_screen'>
-                {
-                    (screen == 'main') &&
+                <div className='back-button' onClick={() => handleSetScreen('main')}>
+                    <p>Volver</p>
+                </div>
+                {/* Pantalla Principal */}
+                {screen === 'main' && (
                     <div>
-                        <div className='option' onClick={()=>setScreen('players')}>
-                            <p>Jugadores</p>
-                        </div>
-                        <div className='option' onClick={()=>setScreen('skills')}>
+                        <div className='option' onClick={() => handleSetScreen('skills')}>
                             <p>Habilidades</p>
                         </div>
-                        <div className='option' onClick={()=>setScreen('teamBuilder')}>
-                            <p>Armar equipos</p>
+                        <div className='option' onClick={() => handleSetScreen('players')}>
+                            <p>Jugadores</p>
+                        </div>
+                        <div className='option'>
+                            <p>Equipos</p>
                         </div>
                     </div>
-                }
-                {
-                    (screen == 'players') &&
+                )}
+                
+                {/* Pantalla de Jugadores */}
+                {screen === 'players' && (
                     <div>
-                        <div className='csv_handler'>
-                            <input
-                                type="file"
-                                accept=".csv"
-                                onChange={handleFileImport}
-                                id="fileInput"
-                                className="file-input"
+                        <h2>Jugadores</h2>
+                        <div className='import'>
+                            <p>Importar datos</p>
+                            <input 
+                                type="file" 
+                                accept=".json" 
+                                onChange={handleFileImport} 
                             />
-                            <label htmlFor="fileInput" className="file-label">
-                                <Upload className="mr-2" /> Importar jugadores
-                            </label>
                         </div>
-                        <div onClick={() => setCreatingPlayer(true)}>
-                            <p>Crear jugador</p>
+                        <div className='export' onClick={exportSkillsToJSON}>
+                            <p>Exportar datos</p>
                         </div>
-                        {
-                            (creatingPlayer) &&
-                            <div>
-                                <div>
-                                    <label>Nombre:</label>
-                                    <input
-                                        type="text"
-                                        value={newPlayerName}
-                                        onChange={(e) => setNewPlayerName(e.target.value)}
-                                        className="w-full p-2 border rounded mb-4"
-                                    />    
-                                    <label className="block mb-2">Categoría:</label>
-                                    <input
-                                        type="text"
-                                        value={newPlayerCategory}
-                                        onChange={(e) => setNewPlayerCategory(e.target.value)}
-                                        className="w-full p-2 border rounded"
-                                    />
-                                    <div className='button-panel'>
-                                        <div className='button'>
-                                            <p>Cancelar</p>
-                                        </div>
-                                        <div className='button'>
-                                            <p>Guardar</p>
-                                        </div>
-                                    </div>
+                        
+                        {!creatingPlayer ? (
+                            <div className='create-button' onClick={() => setCreatingPlayer(true)}>
+                                <p>Crear jugador</p>
+                            </div>
+                        ) : (
+                            <div className='create-form'>
+                                <input
+                                    type="text"
+                                    placeholder="Nombre"
+                                    value={newPlayerName}
+                                    onChange={(e) => setNewPlayerName(e.target.value)}
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Categoría"
+                                    value={newPlayerCategory}
+                                    onChange={(e) => setNewPlayerCategory(e.target.value)}
+                                />
+                                <div className='button-row'>
+                                    <button onClick={addPlayer}>Guardar</button>
+                                    <button onClick={() => {
+                                        setCreatingPlayer(false);
+                                        setNewPlayerName("");
+                                        setNewPlayerCategory("");
+                                    }}>Cancelar</button>
                                 </div>
                             </div>
-                        }
+                        )}
+                        
                         <p>{players.length} jugadores</p>
-                        <div className="players">
+                        <div className="players-list">
                             {players.map((player, index) => (
                                 <div 
                                     key={index} 
-                                    onClick={(() => setCurrentPlayer(player),() => setScreen(`player`))}
-                                    className={`player_item`}
+                                    onClick={() => handleSetScreen('player', player)}
+                                    className="players-list-item"
                                 >
                                     <p>{player.name}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
-                }
-                {
-                    (screen == 'player') &&
+                )}
+                
+                {/* Pantalla de Jugador Individual */}
+                {screen === 'player' && currentPlayer && (
                     <div>
-                        <div className='option'>
-                            <p>{currentPlayer[0]}</p>
+                        <h2>Jugador: {currentPlayer.name}</h2>
+                        <p>Categoría: {currentPlayer.category}</p>
+
+                        <div className='delete-button' onClick={() => removePlayer(currentPlayer)}>
+                            <p>Eliminar jugador</p>
                         </div>
-                        {Object.entries(skillsFrom(currentPlayer)).map((skill, value) => (
+                        
+                        <h3>Habilidades</h3>
+                        <div className="skills-list">
+                            {Object.entries(getPlayerSkills(currentPlayer)).map(([skill, rank], index) => (
                                 <div 
-                                    key={value} 
-                                    onClick={(setScreen(`skill`))}
-                                    className={`skill_item`}
+                                    key={index} 
+                                    onClick={() => handleSetScreen('skill', skill)}
+                                    className="skill-item"
                                 >
-                                    <p>{skill}</p>
+                                    <p>{skill}: Posición {rank}</p>
                                 </div>
                             ))}
+                        </div>
                     </div>
-                }
-                {
-                    (screen == 'skills') &&
+                )}
+                
+                {/* Pantalla de Habilidades */}
+                {screen === 'skills' && (
                     <div>
-                        <div className="skills">
+                        <h2>Habilidades</h2>
+                        
+                        {!creatingSkill ? (
+                            <div className='create-button' onClick={() => setCreatingSkill(true)}>
+                                <p>Crear habilidad</p>
+                            </div>
+                        ) : (
+                            <div className='create-form'>
+                                <input
+                                    type="text"
+                                    placeholder="name de la habilidad"
+                                    value={newSkillName}
+                                    onChange={(e) => setNewSkillName(e.target.value)}
+                                />
+                                <div className='button-row'>
+                                    <button onClick={addSkill}>Guardar</button>
+                                    <button onClick={() => {
+                                        setCreatingSkill(false);
+                                        setNewSkillName("");
+                                    }}>Cancelar</button>
+                                </div>
+                            </div>
+                        )}
+                        
+                        <p>{Object.keys(skills).length} habilidades</p>
+                        <div className="skills-list">
                             {Object.keys(skills).map((skill, index) => (
                                 <div 
                                     key={index} 
-                                    onClick={(() => setCurrentSkill(skill),setScreen(`skill`))}
-                                    className={`skill-item`}
+                                    onClick={() => handleSetScreen('skill', skill)}
+                                    className="skill-item"
                                 >
                                     <p>{skill}</p>
                                 </div>
                             ))}
                         </div>
                     </div>
-                }
-                {
-                    (screen == 'skill') &&
+                )}
+                
+                {/* Pantalla de Habilidad Individual */}
+                {screen === 'skill' && currentSkill && skills[currentSkill] && (
                     <div>
-                        <div className='option'>
-                            <p>{currentSkill}</p>
+                        <h2>Habilidad: {currentSkill}</h2>                        
+                        <div className='delete-button' onClick={() => removeSkill(currentSkill)}>
+                            <p>Eliminar habilidad</p>
                         </div>
-                        <div className="skills">
-                            {Object.values(currentSkill).map((player, index) => (
-                                <div 
-                                    key={index} 
-                                    onClick={(() => setCurrentPlayer(player),setScreen(`player`))}
-                                    className={`player-item`}
-                                >
-                                    <p>{player}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                }
-                {
-                    (screen == 'teamBuilder') &&
-                    <div>
-                        <div className='option'>
-                            <p>Seleccionar jugadores</p>
-                            <div className="player-selection">
-                                {players.map((player, index) => (
+                        
+                        <h3>Ranking de jugadores</h3>
+                        <p className="drag-instructions">Arrastra los jugadores para cambiar su posición</p>
+                        
+                        <DragDropContext onDragEnd={handleDragEnd}>
+                            <Droppable droppableId={`skill-${currentSkill}`}>
+                                {(provided) => (
                                     <div 
-                                        key={index} 
-                                        onClick={() => togglePlayerSelection(player)}
-                                        className={`player-item ${selectedPlayers.includes(player) ? 'selected' : ''}`}
+                                        className="players-list ranked"
+                                        ref={provided.innerRef}
+                                        {...provided.droppableProps}
                                     >
-                                        {selectedPlayers.includes(player) && <Check size={20} />}
-                                        {player.Jugador}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className='content'>
-                                {teams.team1.length > 0 && (
-                                    <div className="teams-container">
-                                        <div className="team">
-                                            <h3>Equipo 1</h3>
-                                            {teams.team1.map((player, index) => (
-                                                <p key={index}>
-                                                    {player.Jugador}
-                                                </p>
-                                            ))}
-                                        </div>
-                                        
-                                        <div className="team">
-                                            <h3>Equipo 2</h3>
-                                            {teams.team2.map((player, index) => (
-                                                <p key={index}>
-                                                    {player.Jugador}
-                                                </p>
-                                            ))}
-                                        </div>
+                                        {skills[currentSkill].map((player, index) => (
+                                            <Draggable 
+                                                key={`${player.name}-${player.category}`}
+                                                draggableId={`${player.name}-${player.category}`}
+                                                index={index}
+                                            >
+                                                {(provided, snapshot) => (
+                                                    <div 
+                                                        className={`player-item ${snapshot.isDragging ? 'dragging' : ''}`}
+                                                        ref={provided.innerRef}
+                                                        {...provided.draggableProps}
+                                                        {...provided.dragHandleProps}
+                                                        onClick={(e) => {
+                                                            // Solo navegamos al jugador si no estamos arrastrando
+                                                            if (!snapshot.isDragging) {
+                                                                e.stopPropagation();
+                                                                handleSetScreen('player', player);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <p>{player.name}</p>
+                                                        <div className="drag-handle">⋮⋮</div>
+                                                    </div>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                        {provided.placeholder}
                                     </div>
                                 )}
-                            </div>
-                        </div>
-                        <div className='option' onClick={createTeams}>
-                            <p>Armar equipos</p>
-                        </div>
+                            </Droppable>
+                        </DragDropContext>
                     </div>
-                }
-            </div>
-            <div className='tools'>
-                <div className='option'>
-                    <p>Exportar</p>
-                </div>
-                <div className='option'>
-                    <p>Guardar</p>
-                </div>
+                )}
             </div>
         </div>
     );
