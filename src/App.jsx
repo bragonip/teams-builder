@@ -237,15 +237,9 @@ const App = () =>{
                     <input
                         type="file"
                         accept=".json"
-                        onChange={importSkills} // Vinculado a la función importSkills
-                        style={{ display: "none" }}
-                        id="import-file"
+                        onChange={importSkills} 
+                        style={{ cursor: "pointer", padding: "10px", border: "1px solid #ccc" }}
                     />
-
-                    {/* Botón personalizado para importar */}
-                    <label htmlFor="import-file">
-                        <button>Importar Skills</button>
-                    </label>
                 </div>
                     {/*<div className='players_io_button'>
                             <p>IMPORTAR</p>
