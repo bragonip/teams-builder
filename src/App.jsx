@@ -55,8 +55,8 @@ const App = () =>{
 
 
     // Función para agregar una skill con su lista de players
-    const addSkill = (skillName) => {
-        const normalizedSkillName = normalizeString(skillName);
+    const addSkill = () => {
+        const normalizedSkillName = normalizeString(newSkillName);
         const updatedSkills = new Map(skills);
     
         if (updatedSkills.has(normalizedSkillName)) {
@@ -254,7 +254,7 @@ const App = () =>{
                             />
                     </div>
                     <div className='players_save_skill'>
-                        <button onClick={addSkill}>Guardar</button>
+                        <button onClick={()=>addSkill()}>Guardar</button>
                     </div>
                 </div>
                 <div className="skills_list">
