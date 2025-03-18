@@ -21,23 +21,20 @@ const App = () =>{
 
     // Función para agregar un jugador a todas las skills
     const addPlayer = () => {
-        const updatedSkills = new Map(skills);
-
-        if (updatedSkills.size === 0) {
-            console.warn("No hay skills disponibles para agregar un jugador.");
-            return;
-        }
-
         const normalizedPlayer = {
-            name: normalizeString(newPlayerName.name),
-            category: normalizeString(newPlayerCategory.category),
+            name: normalizeString(newPlayerName), // Usar directamente el string
+            category: normalizeString(newPlayerCategory), // Usar directamente el string
         };
-
-        updatedSkills.forEach((skillName,playersList) => {
+    
+        const updatedSkills = new Map(skills);
+    
+        updatedSkills.forEach((playersList, skillName) => { // Parámetros corregidos (valor, clave)
             updatedSkills.set(skillName, [...playersList, normalizedPlayer]);
         });
-
+    
         setSkills(updatedSkills);
+        setNewPlayerName(""); // Limpiar campos después de agregar
+        setNewPlayerCategory("");
     };
 
     // Función para eliminar un jugador de todas las skills
@@ -58,21 +55,20 @@ const App = () =>{
     const addSkill = () => {
         const normalizedSkillName = normalizeString(newSkillName);
         const updatedSkills = new Map(skills);
-    
+      
         if (updatedSkills.has(normalizedSkillName)) {
-            console.warn(`La skill "${normalizedSkillName}" ya existe.`);
+            toast.error("La skill ya existe");
             return;
         }
-    
-        const allPlayers = updatedSkills.size > 0
-            ? updatedSkills.values().next().value
-            : [];
-    
+      
+        // Tomar jugadores de la primera skill o array vacío
+        const allPlayers = Array.from(updatedSkills.values())[0] || [];
+        
         updatedSkills.set(normalizedSkillName, [...allPlayers]);
         setSkills(updatedSkills);
-        };
+        setNewSkillName("");
+    };
     
-
     const getPlayerRankInSkill = (player, skillName) => {
         if (!skills[skillName]) return -1;
         
