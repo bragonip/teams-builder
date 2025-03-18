@@ -22,13 +22,16 @@ const App = () =>{
     // Función para agregar un jugador a todas las skills
     const addPlayer = () => {
         const normalizedPlayer = {
-            name: normalizeString(newPlayerName), // Usar directamente el string
-            category: normalizeString(newPlayerCategory), // Usar directamente el string
+            name: normalizeString(newPlayerName),
+            category: normalizeString(newPlayerCategory),
         };
     
-        const updatedSkills = new Map(skills);
+        // Actualizar el estado de players
+        setPlayers((prevPlayers) => [...prevPlayers, normalizedPlayer]);
     
-        updatedSkills.forEach((playersList, skillName) => { // Parámetros corregidos (valor, clave)
+        // Actualizar el estado de skills
+        const updatedSkills = new Map(skills);
+        updatedSkills.forEach((playersList, skillName) => {
             updatedSkills.set(skillName, [...playersList, normalizedPlayer]);
         });
     
@@ -39,14 +42,22 @@ const App = () =>{
 
     // Función para eliminar un jugador de todas las skills
     const deletePlayer = (playerToDelete) => {
+        // Actualizar el estado de players
+        setPlayers((prevPlayers) =>
+            prevPlayers.filter(
+                (player) => player.name !== playerToDelete.name
+            )
+        );
+    
+        // Actualizar el estado de skills
         const updatedSkills = new Map(skills);
-
-        updatedSkills.forEach((skillName, playersList) => {
+        updatedSkills.forEach((playersList, skillName) => {
             const updatedPlayers = playersList.filter(
                 (player) => player.name !== playerToDelete.name
             );
             updatedSkills.set(skillName, updatedPlayers);
         });
+    
         setSkills(updatedSkills);
     };
 
@@ -147,6 +158,57 @@ const App = () =>{
         setSkills(updatedSkills);
     };
 
+    const exportSkills = () => {
+        // Convertir el Map a un array de pares [key, value]
+        const skillsArray = Array.from(skills.entries());
+    
+        // Convertir el array a JSON
+        const jsonString = JSON.stringify(skillsArray, null, 2);
+    
+        // Crear un archivo Blob con el JSON
+        const blob = new Blob([jsonString], { type: "application/json" });
+    
+        // Crear un enlace de descarga
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "skills.json"; // Nombre del archivo
+        link.click();
+    
+        // Liberar el objeto URL
+        URL.revokeObjectURL(url);
+    };
+
+    const importSkills = (event) => {
+        const file = event.target.files[0]; // Obtener el archivo seleccionado
+    
+        if (!file) {
+            toast.error("No se seleccionó ningún archivo");
+            return;
+        }
+    
+        const reader = new FileReader();
+    
+        reader.onload = (e) => {
+            try {
+                const jsonString = e.target.result;
+                const skillsArray = JSON.parse(jsonString); // Convertir JSON a array
+    
+                // Convertir el array de nuevo a un Map
+                const importedSkills = new Map(skillsArray);
+    
+                // Actualizar el estado de skills
+                setSkills(importedSkills);
+                toast.success("Skills importadas correctamente");
+            } catch (error) {
+                toast.error("Error al importar el archivo: Formato inválido");
+                console.error(error);
+            }
+        };
+    
+        reader.readAsText(file); // Leer el archivo como texto
+    };
+
 
     return(
         <div className='app'>
@@ -167,13 +229,26 @@ const App = () =>{
             {(screen === 'players') &&
             (<div className='players_screen'>
                 <div className='players_io_data'>
-                        <div className='players_io_button'>
+                <div>
+                    <button onClick={exportSkills}>Exportar Skills</button>
+                    <input
+                        type="file"
+                        accept=".json"
+                        onChange={importSkills}
+                        style={{ display: "none" }}
+                        id="import-file"
+                    />
+                    <label htmlFor="import-file">
+                        <button>Importar Skills</button>
+                    </label>
+                </div>
+                    {/*<div className='players_io_button'>
                             <p>IMPORTAR</p>
                         </div>
                         <div className='players_io_button'>
                             <p>EXPORTAR</p>
                         </div>
-                </div>
+                    </div>*/}
                 <div className='players_create'>
                     <div className='players_create_input'>
                         <input
