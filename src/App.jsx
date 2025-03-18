@@ -348,6 +348,7 @@ const App = () =>{
                     </DragDropContext>
                 </div>
             </div>)}
+            <button onClick={() => setScreen("main")}>Volver</button>
         </div>
     )
 };
