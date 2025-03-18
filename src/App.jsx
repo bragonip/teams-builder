@@ -248,6 +248,15 @@ const App = () =>{
                 <div>
                     {/* Botón para exportar */}
                     <button onClick={exportSkills}>Exportar Skills</button>
+
+                    {/* Input de archivo oculto */}
+                    <input
+                        type="file"
+                        accept=".json"
+                        ref={fileInputRef}
+                        onChange={importSkills} 
+                        style={{ display: "none" }}
+                    />
                     {/* Botón para importar */}
                     <button onClick={triggerFileInput}>Importar Skills</button>
                 </div>
