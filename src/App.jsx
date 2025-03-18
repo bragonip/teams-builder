@@ -229,26 +229,26 @@ const App = () =>{
             {(screen === 'players') &&
             (<div className='players_screen'>
                 <div className='players_io_data'>
-                <div>
-                    <button onClick={exportSkills}>Exportar Skills</button>
-                    <input
-                        type="file"
-                        accept=".json"
-                        onChange={importSkills}
-                        style={{ display: "none" }}
-                        id="import-file"
-                    />
-                    <label htmlFor="import-file">
-                        <button>Importar Skills</button>
-                    </label>
-                </div>
+                    <div>
+                        <button onClick={exportSkills}>Exportar Skills</button>
+                        <input
+                            type="file"
+                            accept=".json"
+                            onChange={importSkills}
+                            style={{ display: "none" }}
+                            id="import-file"
+                        />
+                        <label htmlFor="import-file">
+                            <button>Importar Skills</button>
+                        </label>
+                    </div>
                     {/*<div className='players_io_button'>
                             <p>IMPORTAR</p>
                         </div>
                         <div className='players_io_button'>
                             <p>EXPORTAR</p>
-                        </div>
-                    </div>*/}
+                        </div>*/}
+                </div>
                 <div className='players_create'>
                     <div className='players_create_input'>
                         <input
