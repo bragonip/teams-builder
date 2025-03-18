@@ -191,7 +191,7 @@ const App = () =>{
     };
 
     const importSkills = (event) => {
-        const file = event.target.files[0]; // Obtener el archivo seleccionado
+        const file = event.target.files[0];
     
         if (!file) {
             toast.error("No se seleccionó ningún archivo");
@@ -203,23 +203,28 @@ const App = () =>{
         reader.onload = (e) => {
             try {
                 const jsonString = e.target.result;
-                const skillsArray = JSON.parse(jsonString); // Convertir JSON a array
-    
-                // Convertir el array de nuevo a un Map
+                const skillsArray = JSON.parse(jsonString);
                 const importedSkills = new Map(skillsArray);
-    
-                // Actualizar el estado de skills
+                
+                // Tomar los jugadores de la primera habilidad en la lista
+                // Todas las habilidades deberían tener la misma lista de jugadores
+                if (importedSkills.size > 0) {
+                    const firstSkillName = Array.from(importedSkills.keys())[0];
+                    const playersFromSkill = importedSkills.get(firstSkillName);
+                    setPlayers(playersFromSkill);
+                }
+                
                 setSkills(importedSkills);
-                toast.success("Skills importadas correctamente");
+                toast.success("Datos importados correctamente");
             } catch (error) {
                 toast.error("Error al importar el archivo: Formato inválido");
                 console.error(error);
             }
         };
     
-        reader.readAsText(file); // Leer el archivo como texto
+        reader.readAsText(file);
+        event.target.value = '';
     };
-
 
     return(
         <div className='app'>
