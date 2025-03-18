@@ -33,7 +33,7 @@ const App = () =>{
             category: normalizeString(newPlayerCategory.category),
         };
 
-        updatedSkills.forEach((playersList, skillName) => {
+        updatedSkills.forEach((skillName,playersList) => {
             updatedSkills.set(skillName, [...playersList, normalizedPlayer]);
         });
 
