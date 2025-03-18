@@ -20,7 +20,7 @@ const App = () =>{
     const normalizeString = (str) => str.trim().toUpperCase();
 
     // Función para agregar un jugador a todas las skills
-    const addPlayer = (player) => {
+    const addPlayer = () => {
         const updatedSkills = new Map(skills);
 
         if (updatedSkills.size === 0) {
@@ -29,9 +29,8 @@ const App = () =>{
         }
 
         const normalizedPlayer = {
-            ...player,
-            name: normalizeString(player.name),
-            category: normalizeString(player.category),
+            name: normalizeString(newPlayerName.name),
+            category: normalizeString(newPlayerCategory.category),
         };
 
         updatedSkills.forEach((playersList, skillName) => {
@@ -195,7 +194,7 @@ const App = () =>{
                             />
                     </div>
                     <div className='players_save_player'>
-                        <button onClick={addPlayer}>Guardar</button>
+                        <button onClick={()=>addPlayer()}>Guardar</button>
                     </div>
                 </div>
                 <div className='players_list'>
