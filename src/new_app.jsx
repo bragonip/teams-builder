@@ -300,54 +300,53 @@ const App = () =>{
                     </DragDropContext>
                 </div>
             </div>)}
-            {/*-----------------------skill screen----------------------*/}
+            {/* Pantalla de Habilidad Individual */}
             {screen === "skill" && (
             <div className='skill'>
                 <p>{currentSkill}</p>
-                <div className='skill_players_list'>
-                    <DragDropContext onDragEnd={handleDragEnd}>
-                        <Droppable droppableId={`skill-${currentSkill}`}>
-                            {(provided) => (
-                                <div
+                {/* Lista de jugadores arrastrables */}
+                <DragDropContext onDragEnd={handleDragEnd}>
+                    <Droppable droppableId={`skill-${currentSkill}`}>
+                        {(provided) => (
+                            <div
                                 className="players-list ranked"
                                 ref={provided.innerRef}
                                 {...provided.droppableProps}
-                                >
-                                    {skills.get(currentSkill).map((player, index) => (
-                                        <Draggable
-                                            key={`${player.name}-${player.category}`}
-                                            draggableId={`${player.name}-${player.category}`}
-                                            index={index}
-                                        >
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    className={`player-item ${
-                                                        snapshot.isDragging ? "dragging" : ""
-                                                    }`}
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                    onClick={(e) => {
-                                                        // Solo navegamos al jugador si no estamos arrastrando
-                                                        if (!snapshot.isDragging) {
-                                                            e.stopPropagation();
-                                                            setCurrentPlayer(player);
-                                                            setScreen("player");
-                                                        }
-                                                    }}
-                                                    >
-                                                    <p>{player.name}</p>
-                                                    <div className="drag-handle">⋮⋮</div>
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
-                                    {provided.placeholder}
-                                </div>
-                            )}
-                        </Droppable>
-                    </DragDropContext>
-                </div>
+                            >
+                                {skills.get(currentSkill).map((player, index) => (
+                                    <Draggable
+                                        key={`${player.name}-${player.category}`}
+                                        draggableId={`${player.name}-${player.category}`}
+                                        index={index}
+                                    >
+                                        {(provided, snapshot) => (
+                                            <div
+                                                className={`player-item ${
+                                                    snapshot.isDragging ? "dragging" : ""
+                                                }`}
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                {...provided.dragHandleProps}
+                                                onClick={(e) => {
+                                                    // Solo navegamos al jugador si no estamos arrastrando
+                                                    if (!snapshot.isDragging) {
+                                                        e.stopPropagation();
+                                                        setCurrentPlayer(player);
+                                                        setScreen("player");
+                                                    }
+                                                }}
+                                            >
+                                                <p>{player.name}</p>
+                                                <div className="drag-handle">⋮⋮</div>
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
             </div>)}
         </div>
     )
