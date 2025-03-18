@@ -194,25 +194,29 @@ const App = () =>{
 
     const importSkills = (event) => {
         const file = event.target.files[0];
-    
+        
         if (!file) {
             toast.error("No se seleccionó ningún archivo");
             return;
         }
-    
+        
         const reader = new FileReader();
-    
+        
         reader.onload = (e) => {
             try {
                 const jsonString = e.target.result;
                 const skillsArray = JSON.parse(jsonString);
+                
+                // Create a new Map from the array
                 const importedSkills = new Map(skillsArray);
                 
-                // Tomar los jugadores de la primera habilidad en la lista
+                // Important: Extract and set players from the first skill
                 if (importedSkills.size > 0) {
                     const firstSkillName = Array.from(importedSkills.keys())[0];
                     const playersFromSkill = importedSkills.get(firstSkillName);
-                    setPlayers(playersFromSkill);
+                    
+                    // Set players state correctly
+                    setPlayers([...playersFromSkill]);
                 }
                 
                 setSkills(importedSkills);
@@ -222,11 +226,11 @@ const App = () =>{
                 console.error(error);
             }
         };
-    
+        
         reader.readAsText(file);
         event.target.value = '';
     };
-
+    
     // Función para calcular el valor de cada jugador
     const calculatePlayerValues = () => {
         const skillsArray = Array.from(skills.entries());
