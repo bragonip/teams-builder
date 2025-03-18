@@ -4,6 +4,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import './App.css';
 
+import { useRef } from 'react';
+
+
 const App = () =>{
 
     const [screen, setScreen] = useState('main');
@@ -15,6 +18,12 @@ const App = () =>{
     const [newPlayerCategory, setNewPlayerCategory] = useState("");
     const [newSkillName, setNewSkillName] = useState("");
 
+
+    const fileInputRef = useRef(null);
+
+    const triggerFileInput = () => {
+        fileInputRef.current.click();
+    };
 
     // Función para normalizar un string (trim + mayúsculas)
     const normalizeString = (str) => str.trim().toUpperCase();
@@ -234,12 +243,16 @@ const App = () =>{
                     <button onClick={exportSkills}>Exportar Skills</button>
 
                     {/* Input de archivo oculto */}
-                    <input
-                        type="file"
-                        accept=".json"
-                        onChange={importSkills} 
-                        style={{ cursor: "pointer", padding: "10px", border: "1px solid #ccc" }}
-                    />
+                        <div>
+                            <input 
+                                type="file" 
+                                accept=".json" 
+                                ref={fileInputRef} 
+                                style={{ display: 'none' }} 
+                                onChange={importSkills} 
+                            />
+                            <button onClick={triggerFileInput}>Importar Skills</button>
+                        </div>
                 </div>
                     {/*<div className='players_io_button'>
                             <p>IMPORTAR</p>
