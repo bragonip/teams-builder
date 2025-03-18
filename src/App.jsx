@@ -17,6 +17,8 @@ const App = () =>{
     const [newPlayerName, setNewPlayerName] = useState("");
     const [newPlayerCategory, setNewPlayerCategory] = useState("");
     const [newSkillName, setNewSkillName] = useState("");
+    const [selectedPlayers, setSelectedPlayers] = useState([]);
+    const [teams, setTeams] = useState({ teamA: [], teamB: [], totalA: 0, totalB: 0 });
 
 
     const fileInputRef = useRef(null);
@@ -207,7 +209,6 @@ const App = () =>{
                 const importedSkills = new Map(skillsArray);
                 
                 // Tomar los jugadores de la primera habilidad en la lista
-                // Todas las habilidades deberían tener la misma lista de jugadores
                 if (importedSkills.size > 0) {
                     const firstSkillName = Array.from(importedSkills.keys())[0];
                     const playersFromSkill = importedSkills.get(firstSkillName);
@@ -224,6 +225,123 @@ const App = () =>{
     
         reader.readAsText(file);
         event.target.value = '';
+    };
+
+    // Función para calcular el valor de cada jugador
+    const calculatePlayerValues = () => {
+        const skillsArray = Array.from(skills.entries());
+        const playersWithValues = [];
+
+        skillsArray.forEach(([skillName, playersList], skillIndex) => {
+            const skillPosition = skillIndex + 1;
+            playersList.forEach((player, playerIndex) => {
+                const playerPosition = playerIndex + 1;
+                const value = skillPosition * playerPosition;
+                playersWithValues.push({
+                    ...player,
+                    skill: skillName,
+                    positionInSkill: playerPosition,
+                    value: value,
+                });
+            });
+        });
+
+        return playersWithValues;
+    };
+
+    // Función para crear equipos balanceados
+    const createTeams = () => {
+        if (selectedPlayers.length < 2) {
+            toast.warn("Se necesitan al menos 2 jugadores para formar equipos");
+            return { teamA: [], teamB: [], totalA: 0, totalB: 0 };
+        }
+
+        let players = [...selectedPlayers];
+        const teamA = [];
+        const teamB = [];
+
+        // Paso 1: Selección inicial aleatoria
+        const firstPlayerIndex = Math.floor(Math.random() * players.length);
+        teamA.push(players.splice(firstPlayerIndex, 1)[0]);
+
+        const secondPlayerIndex = Math.floor(Math.random() * players.length);
+        teamB.push(players.splice(secondPlayerIndex, 1)[0]);
+
+        // Paso 2: Agrupar por categoría y distribuir
+        const playersByCategory = players.reduce((acc, player) => {
+            acc[player.category] = acc[player.category] || [];
+            acc[player.category].push(player);
+            return acc;
+        }, {});
+
+        Object.entries(playersByCategory).forEach(([category, categoryPlayers]) => {
+            const sorted = categoryPlayers.sort((a, b) => b.value - a.value);
+            
+            sorted.forEach((player, index) => {
+                // Para categorías con número impar: balanceamos usando el valor total
+                const currentAValue = teamA.reduce((sum, p) => sum + p.value, 0);
+                const currentBValue = teamB.reduce((sum, p) => sum + p.value, 0);
+                
+                if (index % 2 === 0 || currentAValue <= currentBValue) {
+                    teamA.push(player);
+                } else {
+                    teamB.push(player);
+                }
+            });
+        });
+
+        // Paso 3: Balance final para jugadores restantes
+        let totalA = teamA.reduce((sum, p) => sum + p.value, 0);
+        let totalB = teamB.reduce((sum, p) => sum + p.value, 0);
+
+        while (players.length > 0) {
+            const player = players.pop();
+            if (totalA <= totalB) {
+                teamA.push(player);
+                totalA += player.value;
+            } else {
+                teamB.push(player);
+                totalB += player.value;
+            }
+        }
+
+        return { teamA, teamB, totalA, totalB };
+    };
+
+    // Función para manejar la selección de jugadores para equipos
+    const togglePlayerSelection = (player) => {
+        const playerWithValues = calculatePlayerValues().find(
+            p => p.name === player.name && p.category === player.category
+        );
+        
+        if (!playerWithValues) return;
+        
+        setSelectedPlayers(prev => {
+            const isSelected = prev.some(
+                p => p.name === player.name && p.category === player.category
+            );
+            
+            if (isSelected) {
+                return prev.filter(
+                    p => p.name !== player.name || p.category !== player.category
+                );
+            } else {
+                return [...prev, playerWithValues];
+            }
+        });
+    };
+
+    // Función para generar los equipos
+    const generateTeams = () => {
+        const newTeams = createTeams();
+        setTeams(newTeams);
+    };
+
+    // Función para verificar si un jugador está seleccionado
+    const isPlayerSelected = (player) => {
+        return selectedPlayers.some(
+            p => p.name === player.name && p.category === player.category
+        );
     };
 
     return(
@@ -255,7 +373,7 @@ const App = () =>{
                         accept=".json"
                         ref={fileInputRef}
                         onChange={importSkills} 
-                        style={{ display: "none" }}
+                        style={{ cursor: "pointer", padding: "10px", border: "1px solid #ccc" }}
                     />
                     {/* Botón para importar */}
                     <button onClick={triggerFileInput}>Importar Skills</button>
@@ -432,6 +550,49 @@ const App = () =>{
                             )}
                         </Droppable>
                     </DragDropContext>
+                </div>
+            </div>)}
+            {/*-----------------------teams screen----------------------*/}
+            {screen === "teams" && (
+            <div className='teams'>
+                <div className='teams_header'>
+                    <p>FORMAR EQUIPOS</p>
+                </div>
+                <div className='teams_selection'>
+                    <div className='teams_players_selection'>
+                        <h3>Seleccionar Jugadores</h3>
+                        {players.map((player, index) => (
+                            <div 
+                                key={index} 
+                                className={`teams_player_item ${isPlayerSelected(player) ? 'selected' : ''}`}
+                                onClick={() => togglePlayerSelection(player)}
+                            >
+                                <p>{player.name} - {player.category}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className='teams_actions'>
+                        <button onClick={generateTeams}>Generar Equipos</button>
+                        <button onClick={() => setSelectedPlayers([])}>Limpiar Selección</button>
+                    </div>
+                </div>
+                <div className='teams_result'>
+                    <div className='team_a'>
+                        <h3>Equipo A ({teams.totalA} puntos)</h3>
+                        {teams.teamA.map((player, index) => (
+                            <div key={index} className='team_player'>
+                                <p>{player.name} ({player.value} pts)</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className='team_b'>
+                        <h3>Equipo B ({teams.totalB} puntos)</h3>
+                        {teams.teamB.map((player, index) => (
+                            <div key={index} className='team_player'>
+                                <p>{player.name} ({player.value} pts)</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>)}
             <button onClick={() => setScreen("main")}>Volver</button>
