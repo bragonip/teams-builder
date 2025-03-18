@@ -373,7 +373,7 @@ const App = () =>{
                         accept=".json"
                         ref={fileInputRef}
                         onChange={importSkills} 
-                        style={{ cursor: "pointer", padding: "10px", border: "1px solid #ccc" }}
+                        style={{ display: "none" }}
                     />
                     {/* Botón para importar */}
                     <button onClick={triggerFileInput}>Importar Skills</button>
