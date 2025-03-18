@@ -207,23 +207,28 @@ const App = () =>{
                 const jsonString = e.target.result;
                 const skillsArray = JSON.parse(jsonString);
                 
-                // Create a new Map from the array
-                const importedSkills = new Map(skillsArray);
+                // Create a new Map explicitly from the array
+                const importedSkills = new Map();
+                skillsArray.forEach(([key, value]) => {
+                    importedSkills.set(key, [...value]); // Make sure to clone the arrays
+                });
                 
-                // Important: Extract and set players from the first skill
+                // Explicitly extract players from the first skill with proper cloning
                 if (importedSkills.size > 0) {
                     const firstSkillName = Array.from(importedSkills.keys())[0];
                     const playersFromSkill = importedSkills.get(firstSkillName);
-                    
-                    // Set players state correctly
-                    setPlayers([...playersFromSkill]);
+                    if (playersFromSkill && Array.isArray(playersFromSkill)) {
+                        // Create deep copies of player objects
+                        const playersCopy = playersFromSkill.map(player => ({...player}));
+                        setPlayers(playersCopy);
+                    }
                 }
                 
                 setSkills(importedSkills);
                 toast.success("Datos importados correctamente");
             } catch (error) {
-                toast.error("Error al importar el archivo: Formato inválido");
-                console.error(error);
+                toast.error("Error al importar el archivo: " + error.message);
+                console.error("Import error:", error);
             }
         };
         
