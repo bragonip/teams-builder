@@ -24,7 +24,7 @@ const App = () =>{
     const triggerFileInput = () => {
         fileInputRef.current.click();
     };
-
+    
     // Función para normalizar un string (trim + mayúsculas)
     const normalizeString = (str) => str.trim().toUpperCase();
 
@@ -89,21 +89,23 @@ const App = () =>{
         setNewSkillName("");
     };
     
+    // Corregido: Uso de Map en lugar de objeto
     const getPlayerRankInSkill = (player, skillName) => {
-        if (!skills[skillName]) return -1;
+        const playersInSkill = skills.get(skillName);
+        if (!playersInSkill) return -1;
         
-        return skills[skillName].findIndex(
+        return playersInSkill.findIndex(
             p => p.name === player.name && p.category === player.category
         ) + 1; // +1 para mostrar posición desde 1 en lugar de desde 0
     };
 
-    // Obtener habilidades de un jugador con su ranking
+    // Corregido: Uso de Map en lugar de objeto
     const getPlayerSkills = (player) => {
         if (!player) return {};
         
         const playerSkills = {};
         
-        Object.keys(skills).forEach(skillName => {
+        skills.forEach((playersInSkill, skillName) => {
             const rank = getPlayerRankInSkill(player, skillName);
             if (rank > 0) {
                 playerSkills[skillName] = rank;
@@ -243,23 +245,16 @@ const App = () =>{
                     <button onClick={exportSkills}>Exportar Skills</button>
 
                     {/* Input de archivo oculto */}
-                        <div>
-                            <input 
-                                type="file" 
-                                accept=".json" 
-                                ref={fileInputRef} 
-                                style={{ display: 'none' }} 
-                                onChange={importSkills} 
-                            />
-                            <button onClick={triggerFileInput}>Importar Skills</button>
-                        </div>
+                    <input
+                        type="file"
+                        accept=".json"
+                        ref={fileInputRef}
+                        onChange={importSkills} 
+                        style={{ cursor: "pointer", padding: "10px", border: "1px solid #ccc" }}
+                    />
+                    {/* Botón para importar */}
+                    <button onClick={triggerFileInput}>Importar Skills</button>
                 </div>
-                    {/*<div className='players_io_button'>
-                            <p>IMPORTAR</p>
-                        </div>
-                        <div className='players_io_button'>
-                            <p>EXPORTAR</p>
-                        </div>*/}
                 </div>
                 <div className='players_create'>
                     <div className='players_create_input'>
@@ -299,7 +294,10 @@ const App = () =>{
                 <div className='player_header'>
                     <p>{currentPlayer.name}
                         - {currentPlayer.category}</p>
-                    <div className='player_delete' onClick={() => {deletePlayer(currentPlayer)}}>
+                    <div className='player_delete' onClick={() => {
+                        deletePlayer(currentPlayer);
+                        setScreen('players');
+                    }}>
                         <p>Eliminar jugador</p>
                     </div>
                 </div>
@@ -325,7 +323,7 @@ const App = () =>{
             {(screen === 'skills') && (
             <div className='skills'>
                 <div className='skills_header'>
-                    <p>{currentSkill}</p>
+                    <p>HABILIDADES</p>
                 </div>
                 <div className='skills_create'>
                     <div className='skills_create_input'>
@@ -432,6 +430,8 @@ const App = () =>{
                 </div>
             </div>)}
             <button onClick={() => setScreen("main")}>Volver</button>
+            {/* Añadir ToastContainer para mostrar notificaciones */}
+            <ToastContainer position="bottom-right" />
         </div>
     )
 };
