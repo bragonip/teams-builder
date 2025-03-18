@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import './App.css';
+//import './App.css';
 
 import { useRef } from 'react';
 
@@ -230,7 +230,7 @@ const App = () =>{
         reader.readAsText(file);
         event.target.value = '';
     };
-    
+
     // Función para calcular el valor de cada jugador
     const calculatePlayerValues = () => {
         const skillsArray = Array.from(skills.entries());
