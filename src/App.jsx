@@ -378,7 +378,6 @@ const App = () =>{
                         type="file"
                         accept=".json"
                         ref={fileInputRef}
-                        onChange={importSkills} 
                         style={{ display: "none" }}
                     />
                     {/* Botón para importar */}
