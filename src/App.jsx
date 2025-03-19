@@ -3,7 +3,6 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 //import './App.css';
-
 import { useRef } from 'react';
 
 
@@ -19,8 +18,6 @@ const App = () =>{
     const [newSkillName, setNewSkillName] = useState("");
     const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [teams, setTeams] = useState({ teamA: [], teamB: [], totalA: 0, totalB: 0 });
-
-
     const fileInputRef = useRef(null);
 
     const triggerFileInput = () => {
@@ -385,7 +382,7 @@ const App = () =>{
                         style={{ display: "none" }}
                     />
                     {/* Botón para importar */}
-                    <button onClick={triggerFileInput}>Importar Skills</button>
+                    <button onClick={importSkills}>Importar Skills</button>
                 </div>
                 </div>
                 <div className='players_create'>
