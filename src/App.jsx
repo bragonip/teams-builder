@@ -191,7 +191,7 @@ const App = () =>{
 
 
     // Importar datos desde JSON
-    const importSkillsFromJSON = (jsonString) => {
+    const importSkills = (jsonString) => {
         try {
             // Parsea el JSON a objeto JavaScript
             const importedSkills = JSON.parse(jsonString);
@@ -202,12 +202,13 @@ const App = () =>{
             // Actualiza la lista de jugadores
             const updatedPlayers = updatePlayersList(importedSkills);
             setPlayers(updatedPlayers);
-            
-            setMessage("Datos importados correctamente");
-            setHasUnsavedChanges(false);
+        
+            //setMessage("Datos importados correctamente");
+            //setHasUnsavedChanges(false);
             return true;
         } catch (error) {
-            setMessage("Error al importar JSON: " + error.message);
+
+            toast.warn("Error al importar JSON: " + error.message);
             return false;
         }
     };
@@ -223,7 +224,12 @@ const App = () =>{
                 // Usamos JSON.stringify para convertir el objeto en string y poder compararlo
                 uniquePlayers.add(JSON.stringify(player));
             });
-    });
+        });
+        
+        // Convierte de nuevo a objetos
+        const updatedPlayers = Array.from(uniquePlayers).map(playerStr => JSON.parse(playerStr));
+        return updatedPlayers;
+    };
         
 
     // Función para calcular el valor de cada jugador
