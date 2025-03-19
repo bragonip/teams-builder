@@ -189,49 +189,42 @@ const App = () =>{
         URL.revokeObjectURL(url);
     };
 
-    const importSkills = (event) => {
-        const file = event.target.files[0];
-        
-        if (!file) {
-            toast.error("No se seleccionó ningún archivo");
-            return;
+
+    // Importar datos desde JSON
+    const importSkillsFromJSON = (jsonString) => {
+        try {
+            // Parsea el JSON a objeto JavaScript
+            const importedSkills = JSON.parse(jsonString);
+            
+            // Actualiza el objeto skills
+            setSkills(importedSkills);
+            
+            // Actualiza la lista de jugadores
+            const updatedPlayers = updatePlayersList(importedSkills);
+            setPlayers(updatedPlayers);
+            
+            setMessage("Datos importados correctamente");
+            setHasUnsavedChanges(false);
+            return true;
+        } catch (error) {
+            setMessage("Error al importar JSON: " + error.message);
+            return false;
         }
-        
-        const reader = new FileReader();
-        
-        reader.onload = (e) => {
-            try {
-                const jsonString = e.target.result;
-                const skillsArray = JSON.parse(jsonString);
-                
-                // Create a new Map explicitly from the array
-                const importedSkills = new Map();
-                skillsArray.forEach(([key, value]) => {
-                    importedSkills.set(key, [...value]); // Make sure to clone the arrays
-                });
-                
-                // Explicitly extract players from the first skill with proper cloning
-                if (importedSkills.size > 0) {
-                    const firstSkillName = Array.from(importedSkills.keys())[0];
-                    const playersFromSkill = importedSkills.get(firstSkillName);
-                    if (playersFromSkill && Array.isArray(playersFromSkill)) {
-                        // Create deep copies of player objects
-                        const playersCopy = playersFromSkill.map(player => ({...player}));
-                        setPlayers(playersCopy);
-                    }
-                }
-                
-                setSkills(importedSkills);
-                toast.success("Datos importados correctamente");
-            } catch (error) {
-                toast.error("Error al importar el archivo: " + error.message);
-                console.error("Import error:", error);
-            }
-        };
-        
-        reader.readAsText(file);
-        event.target.value = '';
     };
+
+    // Actualizar lista de jugadores basado en las habilidades
+    const updatePlayersList = (skillsData = skills) => {
+        // Set para evitar duplicados
+        const uniquePlayers = new Set();
+        
+        // Recorre todas las habilidades
+        Object.values(skillsData).forEach(playersInSkill => {
+            playersInSkill.forEach(player => {
+                // Usamos JSON.stringify para convertir el objeto en string y poder compararlo
+                uniquePlayers.add(JSON.stringify(player));
+            });
+    });
+        
 
     // Función para calcular el valor de cada jugador
     const calculatePlayerValues = () => {
@@ -378,10 +371,11 @@ const App = () =>{
                         type="file"
                         accept=".json"
                         ref={fileInputRef}
+                        onChange={importSkills} 
                         style={{ display: "none" }}
                     />
                     {/* Botón para importar */}
-                    <button onClick={importSkills}>Importar Skills</button>
+                    <button onClick={triggerFileInput}>Importar Skills</button>
                 </div>
                 </div>
                 <div className='players_create'>
