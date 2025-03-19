@@ -24,6 +24,23 @@ const App = () =>{
         fileInputRef.current.click();
     };
     
+
+    // Add this useEffect to show a warning before page unload
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+        // This message might not be shown in some browsers that have disabled custom messages
+        const message = "¿Seguro que quieres abandonar la página? Los cambios podrían no guardarse.";
+        e.returnValue = message;
+        return message;
+        };
+    
+        window.addEventListener('beforeunload', handleBeforeUnload);
+    
+        return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, []);
+
     // Función para normalizar un string (trim + mayúsculas)
     const normalizeString = (str) => str.trim().toUpperCase();
 
