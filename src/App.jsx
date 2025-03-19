@@ -193,24 +193,33 @@ const App = () =>{
     // Importar datos desde JSON
     const importSkills = (jsonString) => {
         try {
-            // Parsea el JSON a objeto JavaScript
             const importedSkills = JSON.parse(jsonString);
             
-            // Actualiza el objeto skills
-            setSkills(importedSkills);
+            // Convierte el array de vuelta a Map
+            const skillsMap = new Map(importedSkills);
             
-            // Actualiza la lista de jugadores
-            const updatedPlayers = updatePlayersList(importedSkills);
+            setSkills(skillsMap);
+            const updatedPlayers = updatePlayersList(skillsMap);
             setPlayers(updatedPlayers);
-        
-            //setMessage("Datos importados correctamente");
-            //setHasUnsavedChanges(false);
+            
             return true;
         } catch (error) {
-
             toast.warn("Error al importar JSON: " + error.message);
             return false;
         }
+    };
+
+    // Ejemplo de cómo leer el archivo desde un input
+    const handleFileImport = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const jsonString = e.target.result;
+            importSkills(jsonString);
+        };
+        reader.readAsText(file); // ¡Importante! Leer como texto
     };
 
     // Actualizar lista de jugadores basado en las habilidades
@@ -377,7 +386,7 @@ const App = () =>{
                         type="file"
                         accept=".json"
                         ref={fileInputRef}
-                        onChange={importSkills} 
+                        onChange={handleFileImport} 
                         style={{ display: "none" }}
                     />
                     {/* Botón para importar */}
