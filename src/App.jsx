@@ -212,6 +212,19 @@ const App = () =>{
         }
     };
 
+    // Ejemplo de cómo leer el archivo desde un input
+    const handleFileImport = (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const jsonString = e.target.result;
+            importSkills(jsonString);
+        };
+        reader.readAsText(file); // ¡Importante! Leer como texto
+    };
+
     // Actualizar lista de jugadores basado en las habilidades
     const updatePlayersList = (skillsData = skills) => {
         // Set para evitar duplicados
@@ -229,6 +242,7 @@ const App = () =>{
         const updatedPlayers = Array.from(uniquePlayers).map(playerStr => JSON.parse(playerStr));
         return updatedPlayers;
     };
+        
 
     // Función para calcular el valor de cada jugador
     const calculatePlayerValues = () => {
