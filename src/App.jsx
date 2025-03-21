@@ -290,56 +290,59 @@ const App = () =>{
             return { teamA: [], teamB: [], totalA: 0, totalB: 0 };
         }
 
+        // Copiar los jugadores seleccionados para no modificar el original
         let players = [...selectedPlayers];
         const teamA = [];
         const teamB = [];
-
+        
         // Paso 1: Selección inicial aleatoria
         const firstPlayerIndex = Math.floor(Math.random() * players.length);
-        teamA.push(players.splice(firstPlayerIndex, 1)[0]);
-
+        const firstPlayer = players.splice(firstPlayerIndex, 1)[0];
+        teamA.push(firstPlayer);
+        
         const secondPlayerIndex = Math.floor(Math.random() * players.length);
-        teamB.push(players.splice(secondPlayerIndex, 1)[0]);
-
-        // Paso 2: Agrupar por categoría y distribuir
-        const playersByCategory = players.reduce((acc, player) => {
-            acc[player.category] = acc[player.category] || [];
-            acc[player.category].push(player);
-            return acc;
-        }, {});
-
-        Object.entries(playersByCategory).forEach(([category, categoryPlayers]) => {
-            const sorted = categoryPlayers.sort((a, b) => b.value - a.value);
+        const secondPlayer = players.splice(secondPlayerIndex, 1)[0];
+        teamB.push(secondPlayer);
+        
+        // Paso 2: Agrupar los jugadores restantes por categoría
+        const playersByCategory = {};
+        players.forEach(player => {
+            if (!playersByCategory[player.category]) {
+                playersByCategory[player.category] = [];
+            }
+            playersByCategory[player.category].push(player);
+        });
+        
+        // Para cada categoría, ordenar por valor (de mayor a menor) y distribuir equitativamente
+        Object.keys(playersByCategory).forEach(category => {
+            const categoryPlayers = playersByCategory[category];
             
-            sorted.forEach((player, index) => {
-                // Para categorías con número impar: balanceamos usando el valor total
-                const currentAValue = teamA.reduce((sum, p) => sum + p.value, 0);
-                const currentBValue = teamB.reduce((sum, p) => sum + p.value, 0);
+            // Ordenar por valor (de mayor a menor)
+            categoryPlayers.sort((a, b) => b.value - a.value);
+            
+            // Distribuir jugadores alternadamente entre los equipos, empezando por el equipo con menor valor total
+            categoryPlayers.forEach(player => {
+                const totalA = teamA.reduce((sum, p) => sum + p.value, 0);
+                const totalB = teamB.reduce((sum, p) => sum + p.value, 0);
                 
-                if (index % 2 === 0 || currentAValue <= currentBValue) {
+                if (totalA <= totalB) {
                     teamA.push(player);
                 } else {
                     teamB.push(player);
                 }
             });
         });
-
-        // Paso 3: Balance final para jugadores restantes
-        let totalA = teamA.reduce((sum, p) => sum + p.value, 0);
-        let totalB = teamB.reduce((sum, p) => sum + p.value, 0);
-
-        while (players.length > 0) {
-            const player = players.pop();
-            if (totalA <= totalB) {
-                teamA.push(player);
-                totalA += player.value;
-            } else {
-                teamB.push(player);
-                totalB += player.value;
-            }
-        }
-
-        return { teamA, teamB, totalA, totalB };
+        
+        // Calcular totales finales
+        const totalA = teamA.reduce((sum, p) => sum + p.value, 0);
+        const totalB = teamB.reduce((sum, p) => sum + p.value, 0);
+        
+        return { 
+            teamA, 
+            teamB, 
+            totalA, 
+            totalB 
+        };
     };
 
     // Función para manejar la selección de jugadores para equipos
