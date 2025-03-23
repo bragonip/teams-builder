@@ -308,35 +308,44 @@ const App = () =>{
         return Array.from(playerValueMap.values());
     };
 
-    // Función para crear equipos balanceados
+    // Función para crear equipos balanceados con igual cantidad de jugadores
     const createTeams = () => {
         if (selectedPlayers.length < 2) {
             toast.warn("Se necesitan al menos 2 jugadores para formar equipos");
             return { teamA: [], teamB: [], totalA: 0, totalB: 0 };
         }
 
+        // Verificar que hay un número par de jugadores
+        if (selectedPlayers.length % 2 !== 0) {
+            toast.warn("Se necesita un número par de jugadores para formar equipos iguales");
+            return { teamA: [], teamB: [], totalA: 0, totalB: 0 };
+        }
+
         // Copiar los jugadores seleccionados para no modificar el original
-        let players = [...selectedPlayers];
+        let availablePlayers = [...selectedPlayers];
         const teamA = [];
         const teamB = [];
         
         // Paso 1: Selección inicial aleatoria
-        const firstPlayerIndex = Math.floor(Math.random() * players.length);
-        const firstPlayer = players.splice(firstPlayerIndex, 1)[0];
+        const firstPlayerIndex = Math.floor(Math.random() * availablePlayers.length);
+        const firstPlayer = availablePlayers.splice(firstPlayerIndex, 1)[0];
         teamA.push(firstPlayer);
         
-        const secondPlayerIndex = Math.floor(Math.random() * players.length);
-        const secondPlayer = players.splice(secondPlayerIndex, 1)[0];
+        const secondPlayerIndex = Math.floor(Math.random() * availablePlayers.length);
+        const secondPlayer = availablePlayers.splice(secondPlayerIndex, 1)[0];
         teamB.push(secondPlayer);
         
         // Paso 2: Agrupar los jugadores restantes por categoría
         const playersByCategory = {};
-        players.forEach(player => {
+        availablePlayers.forEach(player => {
             if (!playersByCategory[player.category]) {
                 playersByCategory[player.category] = [];
             }
             playersByCategory[player.category].push(player);
         });
+        
+        // Calcular la cantidad objetivo de jugadores por equipo
+        const targetPlayersPerTeam = selectedPlayers.length / 2;
         
         // Para cada categoría, ordenar por valor (de mayor a menor) y distribuir equitativamente
         Object.keys(playersByCategory).forEach(category => {
@@ -345,18 +354,38 @@ const App = () =>{
             // Ordenar por valor (de mayor a menor)
             categoryPlayers.sort((a, b) => b.value - a.value);
             
-            // Distribuir jugadores alternadamente entre los equipos, empezando por el equipo con menor valor total
+            // Distribuir jugadores considerando:
+            // 1. Cantidad de jugadores en cada equipo para que sean iguales
+            // 2. Valor total para que sea lo más balanceado posible
             categoryPlayers.forEach(player => {
                 const totalA = teamA.reduce((sum, p) => sum + p.value, 0);
                 const totalB = teamB.reduce((sum, p) => sum + p.value, 0);
                 
-                if (totalA <= totalB) {
+                // Primero verificamos si algún equipo ya está completo
+                if (teamA.length >= targetPlayersPerTeam) {
+                    teamB.push(player);
+                }
+                else if (teamB.length >= targetPlayersPerTeam) {
                     teamA.push(player);
-                } else {
+                }
+                // Si ninguno está completo, asignamos al equipo con menor valor total
+                else if (totalA <= totalB) {
+                    teamA.push(player);
+                } 
+                else {
                     teamB.push(player);
                 }
             });
         });
+        
+        // Si todavía hay desbalance en la cantidad de jugadores, ajustamos
+        while (teamA.length < targetPlayersPerTeam && availablePlayers.length > 0) {
+            teamA.push(availablePlayers.pop());
+        }
+        
+        while (teamB.length < targetPlayersPerTeam && availablePlayers.length > 0) {
+            teamB.push(availablePlayers.pop());
+        }
         
         // Calcular totales finales
         const totalA = teamA.reduce((sum, p) => sum + p.value, 0);
