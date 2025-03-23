@@ -264,23 +264,48 @@ const App = () =>{
     // Función para calcular el valor de cada jugador
     const calculatePlayerValues = () => {
         const skillsArray = Array.from(skills.entries());
-        const playersWithValues = [];
+        const playerValueMap = new Map(); // Para acumular los valores de cada jugador
 
-        skillsArray.forEach(([skillName, playersList], skillIndex) => {
-            const skillPosition = skillIndex + 1;
-            playersList.forEach((player, playerIndex) => {
-                const playerPosition = playerIndex + 1;
-                const value = skillPosition * playerPosition;
-                playersWithValues.push({
-                    ...player,
-                    skill: skillName,
-                    positionInSkill: playerPosition,
-                    value: value,
-                });
+        // Primero, inicializamos el mapa con todos los jugadores
+        players.forEach(player => {
+            playerValueMap.set(JSON.stringify(player), {
+                ...player,
+                value: 0,
+                details: [] // Para guardar los detalles del cálculo
             });
         });
 
-        return playersWithValues;
+        // Recorremos cada habilidad
+        skillsArray.forEach(([skillName, playersList], skillIndex) => {
+            const skillPosition = skillIndex + 1; // Posición de la habilidad (1-based)
+            
+            // Recorremos cada jugador en esta habilidad
+            playersList.forEach((player, playerIndex) => {
+                const playerPosition = playerIndex + 1; // Posición del jugador en esta habilidad (1-based)
+                const playerValue = skillPosition * playerPosition; // Valor para esta habilidad
+                
+                const playerKey = JSON.stringify(player);
+                const playerData = playerValueMap.get(playerKey);
+                
+                if (playerData) {
+                    // Acumulamos el valor
+                    playerData.value += playerValue;
+                    
+                    // Guardamos los detalles del cálculo para debugging
+                    playerData.details.push({
+                        skill: skillName,
+                        skillPosition: skillPosition,
+                        playerPosition: playerPosition,
+                        contribution: playerValue
+                    });
+                    
+                    playerValueMap.set(playerKey, playerData);
+                }
+            });
+        });
+        
+        // Convertimos el mapa a un array de jugadores con sus valores
+        return Array.from(playerValueMap.values());
     };
 
     // Función para crear equipos balanceados
@@ -347,11 +372,15 @@ const App = () =>{
 
     // Función para manejar la selección de jugadores para equipos
     const togglePlayerSelection = (player) => {
-        const playerWithValues = calculatePlayerValues().find(
+        // Calculamos los valores de todos los jugadores
+        const playersWithValues = calculatePlayerValues();
+        
+        // Encontramos el jugador con sus valores calculados
+        const playerWithValue = playersWithValues.find(
             p => p.name === player.name && p.category === player.category
         );
         
-        if (!playerWithValues) return;
+        if (!playerWithValue) return;
         
         setSelectedPlayers(prev => {
             const isSelected = prev.some(
@@ -363,7 +392,7 @@ const App = () =>{
                     p => p.name !== player.name || p.category !== player.category
                 );
             } else {
-                return [...prev, playerWithValues];
+                return [...prev, playerWithValue];
             }
         });
     };
