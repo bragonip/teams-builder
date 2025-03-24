@@ -373,15 +373,19 @@ const App = () =>{
 
     const addPlayerToTeam = (playerToAdd, isTeam1) => {
         if (isTeam1) {
-            // Añadir al equipo 1 usando spread operator correctamente
             setTeam1([...team1, playerToAdd])
         } else {
-            // Añadir al equipo 2 usando spread operator correctamente
             setTeam2([...team2, playerToAdd])
         }
         
-        // Eliminar el jugador de playersForTeams
-        setPlayersForTeams(playersForTeams.filter(player => player.name !== playerToAdd.name))
+        console.log('Jugador a eliminar:', playerToAdd.name);
+        console.log('Jugadores antes:', playersForTeams);
+        
+        const updatedPlayers = playersForTeams.filter(player => player.name !== playerToAdd.name);
+        
+        console.log('Jugadores después:', updatedPlayers);
+        
+        setPlayersForTeams(updatedPlayers);
     }
 
     return(
