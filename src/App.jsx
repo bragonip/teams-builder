@@ -357,18 +357,18 @@ const App = () =>{
     //};
 
     const removePlayerFromTeam = (playerToRemove) => {
-        // Necesitas especificar de qué equipo quieres eliminar
-        // Esta versión asume que quieres eliminar de ambos equipos
-        // Pero probablemente quieras una lógica más específica
-        const newTeam1 = team1.filter(player => player.id !== playerToRemove.id)
-        const newTeam2 = team2.filter(player => player.id !== playerToRemove.id)
+        // Eliminar de un equipo específico
+        const newTeam1 = team1.filter(player => player.name !== playerToRemove.name)
+        const newTeam2 = team2.filter(player => player.name !== playerToRemove.name)
         
-        // Actualizar ambos equipos
+        // Actualizar equipos
         setTeam1(newTeam1)
         setTeam2(newTeam2)
         
-        // Añadir de vuelta a playersForTeams
-        setPlayersForTeams([...playersForTeams, playerToRemove])
+        // Añadir de vuelta a players y playersForTeams
+        const updatedPlayers = [...players, playerToRemove];
+        setPlayers(updatedPlayers);
+        setPlayersForTeams(updatedPlayers);
     }
 
     const addPlayerToTeam = (playerToAdd, isTeam1) => {
@@ -378,13 +378,11 @@ const App = () =>{
             setTeam2([...team2, playerToAdd])
         }
         
-        console.log('Jugador a eliminar:', playerToAdd.name);
-        console.log('Jugadores antes:', playersForTeams);
+        // Usar players en lugar de playersForTeams
+        const updatedPlayers = players.filter(player => player.name !== playerToAdd.name);
         
-        const updatedPlayers = playersForTeams.filter(player => player.name !== playerToAdd.name);
-        
-        console.log('Jugadores después:', updatedPlayers);
-        
+        // Actualizar tanto players como playersForTeams
+        setPlayers(updatedPlayers);
         setPlayersForTeams(updatedPlayers);
     }
 
