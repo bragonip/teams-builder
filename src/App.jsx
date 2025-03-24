@@ -18,7 +18,10 @@ const App = () =>{
     const [newSkillName, setNewSkillName] = useState("");
     const [selectedPlayers, setSelectedPlayers] = useState([]);
     const [teams, setTeams] = useState({ teamA: [], teamB: [], totalA: 0, totalB: 0 });
+    const [team1, setTeam1] = useState([])
+    const [team2, setTeam2] = useState([])
     const fileInputRef = useRef(null);
+    const [playersForTeams, setPlayersForTeams] = useState([])
 
     const triggerFileInput = () => {
         fileInputRef.current.click();
@@ -50,6 +53,8 @@ const App = () =>{
             name: normalizeString(newPlayerName),
             category: normalizeString(newPlayerCategory),
         };
+
+        setPlayersForTeams(players)
     
         // Actualizar el estado de players
         setPlayers((prevPlayers) => [...prevPlayers, normalizedPlayer]);
@@ -73,7 +78,9 @@ const App = () =>{
                 (player) => player.name !== playerToDelete.name
             )
         );
-    
+        
+        setPlayersForTeams(players)
+
         // Actualizar el estado de skills
         const updatedSkills = new Map(skills);
         updatedSkills.forEach((playersList, skillName) => {
@@ -221,6 +228,7 @@ const App = () =>{
             // Then explicitly update the players list
             const updatedPlayers = updatePlayersList(skillsMap);
             setPlayers(updatedPlayers);
+            setPlayersForTeams(updatedPlayers);
             
             return true;
         } catch (error) {
@@ -308,136 +316,60 @@ const App = () =>{
         return Array.from(playerValueMap.values());
     };
 
-    // Función para crear equipos balanceados con igual cantidad de jugadores
-    const createTeams = () => {
-        if (selectedPlayers.length < 2) {
-            toast.warn("Se necesitan al menos 2 jugadores para formar equipos");
-            return { teamA: [], teamB: [], totalA: 0, totalB: 0 };
-        }
-
-        // Verificar que hay un número par de jugadores
-        if (selectedPlayers.length % 2 !== 0) {
-            toast.warn("Se necesita un número par de jugadores para formar equipos iguales");
-            return { teamA: [], teamB: [], totalA: 0, totalB: 0 };
-        }
-
-        // Copiar los jugadores seleccionados para no modificar el original
-        let availablePlayers = [...selectedPlayers];
-        const teamA = [];
-        const teamB = [];
-        
-        // Paso 1: Selección inicial aleatoria
-        const firstPlayerIndex = Math.floor(Math.random() * availablePlayers.length);
-        const firstPlayer = availablePlayers.splice(firstPlayerIndex, 1)[0];
-        teamA.push(firstPlayer);
-        
-        const secondPlayerIndex = Math.floor(Math.random() * availablePlayers.length);
-        const secondPlayer = availablePlayers.splice(secondPlayerIndex, 1)[0];
-        teamB.push(secondPlayer);
-        
-        // Paso 2: Agrupar los jugadores restantes por categoría
-        const playersByCategory = {};
-        availablePlayers.forEach(player => {
-            if (!playersByCategory[player.category]) {
-                playersByCategory[player.category] = [];
-            }
-            playersByCategory[player.category].push(player);
-        });
-        
-        // Calcular la cantidad objetivo de jugadores por equipo
-        const targetPlayersPerTeam = selectedPlayers.length / 2;
-        
-        // Para cada categoría, ordenar por valor (de mayor a menor) y distribuir equitativamente
-        Object.keys(playersByCategory).forEach(category => {
-            const categoryPlayers = playersByCategory[category];
-            
-            // Ordenar por valor (de mayor a menor)
-            categoryPlayers.sort((a, b) => b.value - a.value);
-            
-            // Distribuir jugadores considerando:
-            // 1. Cantidad de jugadores en cada equipo para que sean iguales
-            // 2. Valor total para que sea lo más balanceado posible
-            categoryPlayers.forEach(player => {
-                const totalA = teamA.reduce((sum, p) => sum + p.value, 0);
-                const totalB = teamB.reduce((sum, p) => sum + p.value, 0);
-                
-                // Primero verificamos si algún equipo ya está completo
-                if (teamA.length >= targetPlayersPerTeam) {
-                    teamB.push(player);
-                }
-                else if (teamB.length >= targetPlayersPerTeam) {
-                    teamA.push(player);
-                }
-                // Si ninguno está completo, asignamos al equipo con menor valor total
-                else if (totalA <= totalB) {
-                    teamA.push(player);
-                } 
-                else {
-                    teamB.push(player);
-                }
-            });
-        });
-        
-        // Si todavía hay desbalance en la cantidad de jugadores, ajustamos
-        while (teamA.length < targetPlayersPerTeam && availablePlayers.length > 0) {
-            teamA.push(availablePlayers.pop());
-        }
-        
-        while (teamB.length < targetPlayersPerTeam && availablePlayers.length > 0) {
-            teamB.push(availablePlayers.pop());
-        }
-        
-        // Calcular totales finales
-        const totalA = teamA.reduce((sum, p) => sum + p.value, 0);
-        const totalB = teamB.reduce((sum, p) => sum + p.value, 0);
-        
-        return { 
-            teamA, 
-            teamB, 
-            totalA, 
-            totalB 
-        };
-    };
-
     // Función para manejar la selección de jugadores para equipos
-    const togglePlayerSelection = (player) => {
-        // Calculamos los valores de todos los jugadores
-        const playersWithValues = calculatePlayerValues();
-        
-        // Encontramos el jugador con sus valores calculados
-        const playerWithValue = playersWithValues.find(
-            p => p.name === player.name && p.category === player.category
-        );
-        
-        if (!playerWithValue) return;
-        
-        setSelectedPlayers(prev => {
-            const isSelected = prev.some(
-                p => p.name === player.name && p.category === player.category
-            );
-            
-            if (isSelected) {
-                return prev.filter(
-                    p => p.name !== player.name || p.category !== player.category
-                );
-            } else {
-                return [...prev, playerWithValue];
-            }
-        });
-    };
+    //const togglePlayerSelection = (player) => {
+    //    // Calculamos los valores de todos los jugadores
+    //    const playersWithValues = calculatePlayerValues();
+    //    
+    //    // Encontramos el jugador con sus valores calculados
+    //    const playerWithValue = playersWithValues.find(
+    //        p => p.name === player.name && p.category === player.category
+    //    );
+    //    
+    //    if (!playerWithValue) return;
+    //    
+    //    setSelectedPlayers(prev => {
+    //        const isSelected = prev.some(
+    //            p => p.name === player.name && p.category === player.category
+    //        );
+    //        
+    //        if (isSelected) {
+    //            return prev.filter(
+    //                p => p.name !== player.name || p.category !== player.category
+    //            );
+    //        } else {
+    //            return [...prev, playerWithValue];
+    //        }
+    //    });
+    //};
 
     // Función para generar los equipos
-    const generateTeams = () => {
-        const newTeams = createTeams();
-        setTeams(newTeams);
-    };
+    //const generateTeams = () => {
+    //    const newTeams = createTeams();
+    //    setTeams(newTeams);
+    //};
+//
+    //// Función para verificar si un jugador está seleccionado
+    //const isPlayerSelected = (player) => {
+    //    return selectedPlayers.some(
+    //        p => p.name === player.name && p.category === player.category
+    //    );
+    //};
 
-    // Función para verificar si un jugador está seleccionado
-    const isPlayerSelected = (player) => {
-        return selectedPlayers.some(
-            p => p.name === player.name && p.category === player.category
-        );
-    };
+    const removePlayerFromTeam = (playerToRemove) => {
+        setTeam1(team1.filter(player => player.name !== playerToRemove.name))
+        setTeam2(team2.filter(player => player.name !== playerToRemove.name))
+        playersForTeams.push(playerToRemove)
+    }
+
+    const addPlayerToTeam = (playerToAdd, team1) => {
+        if (team1) {
+            setTeam1(...team1,playerToAdd)
+        } else {
+            setTeam2(...team2,playerToAdd)
+        }
+        setPlayersForTeams(playersForTeams.filter(player => player.name !== playerToAdd.name))
+    }
 
     return(
         <div className='app'>
@@ -650,46 +582,34 @@ const App = () =>{
             {/*-----------------------teams screen----------------------*/}
             {screen === "teams" && (
             <div className='teams'>
-                <div className='teams_header'>
-                    <p>FORMAR EQUIPOS</p>
+                <div className='team'>
+                    {team1.map(player => {
+                    <div className='team_player_item' onClick={removePlayerFromTeam(player)}>
+                        <p>player.name</p>
+                    </div>})}
                 </div>
-                <div className='teams_selection'>
-                    <div className='teams_players_selection'>
-                        <h3>Seleccionar Jugadores</h3>
-                        {players.map((player, index) => (
-                            <div 
-                                key={index} 
-                                className={`teams_player_item ${isPlayerSelected(player) ? 'selected' : ''}`}
-                                onClick={() => togglePlayerSelection(player)}
-                            >
-                                <p>{player.name} - {player.category}</p>
+                <div className='teams_player'>
+                    {players.map(player => {
+                        <div>
+                            <div onClick={addPlayerToTeam(player,true)}>
+                                <p>{'<'}</p>
                             </div>
-                        ))}
-                    </div>
-                    <div className='teams_actions'>
-                        <button onClick={generateTeams}>Generar Equipos</button>
-                        <button onClick={() => setSelectedPlayers([])}>Limpiar Selección</button>
-                    </div>
+                            <div className='team_player_item'>
+                                <p>player.name</p>
+                            </div>
+                            <div onClick={addPlayerToTeam(player,false)}>
+                                <p>{'>'}</p>
+                            </div>
+                        </div>})}
                 </div>
-                <div className='teams_result'>
-                    <div className='team_a'>
-                        <h3>Equipo A ({teams.totalA} puntos)</h3>
-                        {teams.teamA.map((player, index) => (
-                            <div key={index} className='team_player'>
-                                <p>{player.name} ({player.value} pts)</p>
-                            </div>
-                        ))}
-                    </div>
-                    <div className='team_b'>
-                        <h3>Equipo B ({teams.totalB} puntos)</h3>
-                        {teams.teamB.map((player, index) => (
-                            <div key={index} className='team_player'>
-                                <p>{player.name} ({player.value} pts)</p>
-                            </div>
-                        ))}
-                    </div>
+                <div className='team'>
+                    {team2.map(player => {
+                    <div className='team_player_item' onClick={removePlayerFromTeam(player)}>
+                        <p>player.name</p>
+                    </div>})}
                 </div>
             </div>)}
+
             <button onClick={() => setScreen("main")}>Volver</button>
             {/* Añadir ToastContainer para mostrar notificaciones */}
             <ToastContainer position="bottom-right" />
