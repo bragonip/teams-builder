@@ -365,12 +365,14 @@ const App = () =>{
         setTeam1(newTeam1)
         setTeam2(newTeam2)
         
-        // Añadir de vuelta a players y playersForTeams
-        const updatedPlayers = [...players, playerToRemove];
+        // Añadir de vuelta a players y playersForTeams, ordenando alfabéticamente
+        const updatedPlayers = [...players, playerToRemove]
+            .sort((a, b) => a.name.localeCompare(b.name));
+        
         setPlayers(updatedPlayers);
         setPlayersForTeams(updatedPlayers);
     }
-
+    
     const addPlayerToTeam = (playerToAdd, isTeam1) => {
         if (isTeam1) {
             setTeam1([...team1, playerToAdd])
@@ -378,14 +380,17 @@ const App = () =>{
             setTeam2([...team2, playerToAdd])
         }
         
-        // Usar players en lugar de playersForTeams
-        const updatedPlayers = players.filter(player => player.name !== playerToAdd.name);
+        // Filtrar y ordenar alfabéticamente
+        const updatedPlayers = players
+            .filter(player => player.name !== playerToAdd.name)
+            .sort((a, b) => a.name.localeCompare(b.name));
         
         // Actualizar tanto players como playersForTeams
         setPlayers(updatedPlayers);
         setPlayersForTeams(updatedPlayers);
     }
 
+    
     return(
         <div className='app'>
             {/*-----------------------main screen-----------------------*/}
