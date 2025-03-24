@@ -357,18 +357,31 @@ const App = () =>{
     //};
 
     const removePlayerFromTeam = (playerToRemove) => {
-        setTeam1(team1.filter(player => player.name !== playerToRemove.name))
-        setTeam2(team2.filter(player => player.name !== playerToRemove.name))
-        playersForTeams.push(playerToRemove)
+        // Necesitas especificar de qué equipo quieres eliminar
+        // Esta versión asume que quieres eliminar de ambos equipos
+        // Pero probablemente quieras una lógica más específica
+        const newTeam1 = team1.filter(player => player.id !== playerToRemove.id)
+        const newTeam2 = team2.filter(player => player.id !== playerToRemove.id)
+        
+        // Actualizar ambos equipos
+        setTeam1(newTeam1)
+        setTeam2(newTeam2)
+        
+        // Añadir de vuelta a playersForTeams
+        setPlayersForTeams([...playersForTeams, playerToRemove])
     }
 
-    const addPlayerToTeam = (playerToAdd, team1) => {
-        if (team1) {
-            setTeam1(...team1,playerToAdd)
+    const addPlayerToTeam = (playerToAdd, isTeam1) => {
+        if (isTeam1) {
+            // Añadir al equipo 1 usando spread operator correctamente
+            setTeam1([...team1, playerToAdd])
         } else {
-            setTeam2(...team2,playerToAdd)
+            // Añadir al equipo 2 usando spread operator correctamente
+            setTeam2([...team2, playerToAdd])
         }
-        setPlayersForTeams(playersForTeams.filter(player => player.name !== playerToAdd.name))
+        
+        // Eliminar el jugador de playersForTeams
+        setPlayersForTeams(playersForTeams.filter(player => player.id !== playerToAdd.id))
     }
 
     return(
