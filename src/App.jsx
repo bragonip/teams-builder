@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-//import './App.css';
+import './App_new.css';
 import { useRef } from 'react';
 
 
@@ -609,7 +609,7 @@ const App = () =>{
                             </div>
                         ))}
                     </div>
-                    <div className='teams_player'>
+                    <div className='teams_players'>
                         {players.map(player => (
                             <div key={player.name}>
                                 <div onClick={() => addPlayerToTeam(player, true)}>
@@ -621,8 +621,7 @@ const App = () =>{
                                 <div onClick={() => addPlayerToTeam(player, false)}>
                                     <p>{'>'}</p>
                                 </div>
-                            </div>
-                        ))}
+                            </div>))}
                     </div>
                     <div className='team'>
                         {team2.map(player => (

@@ -1,0 +1,11 @@
+.teams {
+  display: flex;
+  flex-direction: column; /* o row si quieres fila horizontal */
+  gap: 10px;
+}
+
+.teams_players {
+  display: flex;
+  flex-direction: column; /* o row si quieres fila horizontal */
+  gap: 10px;
+}
