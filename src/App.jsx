@@ -612,13 +612,13 @@ const App = () =>{
                     <div className='list_of_players'>
                         {players.map(player => (
                             <div key={player.name}>
-                                <div onClick={() => addPlayerToTeam(player, true)}>
+                                <div className='team_player_item' onClick={() => addPlayerToTeam(player, true)}>
                                     <p>{'<'}</p>
                                 </div>
                                 <div className='team_player_item'>
                                     <p>{player.name}</p>
                                 </div>
-                                <div onClick={() => addPlayerToTeam(player, false)}>
+                                <div className='team_player_item' onClick={() => addPlayerToTeam(player, false)}>
                                     <p>{'>'}</p>
                                 </div>
                             </div>))}
