@@ -583,32 +583,36 @@ const App = () =>{
             {screen === "teams" && (
             <div className='teams'>
                 <div className='team'>
-                    {team1.map(player => {
-                    <div className='team_player_item' onClick={removePlayerFromTeam(player)}>
-                        <p>player.name</p>
-                    </div>})}
+                {team1.map(player => (
+                    <div key={player.id} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
+                    <p>{player.name}</p>
+                    </div>
+                ))}
                 </div>
                 <div className='teams_player'>
-                    {players.map(player => {
-                        <div>
-                            <div onClick={addPlayerToTeam(player,true)}>
-                                <p>{'<'}</p>
-                            </div>
-                            <div className='team_player_item'>
-                                <p>player.name</p>
-                            </div>
-                            <div onClick={addPlayerToTeam(player,false)}>
-                                <p>{'>'}</p>
-                            </div>
-                        </div>})}
+                {players.map(player => (
+                    <div key={player.id}>
+                    <div onClick={() => addPlayerToTeam(player, true)}>
+                        <p>{'<'}</p>
+                    </div>
+                    <div className='team_player_item'>
+                        <p>{player.name}</p>
+                    </div>
+                    <div onClick={() => addPlayerToTeam(player, false)}>
+                        <p>{'>'}</p>
+                    </div>
+                    </div>
+                ))}
                 </div>
                 <div className='team'>
-                    {team2.map(player => {
-                    <div className='team_player_item' onClick={removePlayerFromTeam(player)}>
-                        <p>player.name</p>
-                    </div>})}
+                {team2.map(player => (
+                    <div key={player.id} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
+                    <p>{player.name}</p>
+                    </div>
+                ))}
                 </div>
-            </div>)}
+            </div>
+            )}
 
             <button onClick={() => setScreen("main")}>Volver</button>
             {/* Añadir ToastContainer para mostrar notificaciones */}
