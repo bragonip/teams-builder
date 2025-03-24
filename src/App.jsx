@@ -381,7 +381,7 @@ const App = () =>{
         }
         
         // Eliminar el jugador de playersForTeams
-        setPlayersForTeams(playersForTeams.filter(player => player.id !== playerToAdd.id))
+        setPlayersForTeams(playersForTeams.filter(player => player.name !== playerToAdd.name))
     }
 
     return(
@@ -597,14 +597,14 @@ const App = () =>{
                 <div className='teams'>
                     <div className='team'>
                         {team1.map(player => (
-                            <div key={player.id} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
+                            <div key={player.name} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
                                 <p>{player.name}</p>
                             </div>
                         ))}
                     </div>
                     <div className='teams_player'>
                         {players.map(player => (
-                            <div key={player.id}>
+                            <div key={player.name}>
                                 <div onClick={() => addPlayerToTeam(player, true)}>
                                     <p>{'<'}</p>
                                 </div>
@@ -619,7 +619,7 @@ const App = () =>{
                     </div>
                     <div className='team'>
                         {team2.map(player => (
-                            <div key={player.id} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
+                            <div key={player.name} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
                                 <p>{player.name}</p>
                             </div>
                         ))}
