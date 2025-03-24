@@ -609,7 +609,7 @@ const App = () =>{
                             </div>
                         ))}
                     </div>
-                    <div className='teams_players'>
+                    <div className='list_of_players'>
                         {players.map(player => (
                             <div key={player.name}>
                                 <div onClick={() => addPlayerToTeam(player, true)}>

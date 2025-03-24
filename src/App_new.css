@@ -1,11 +1,21 @@
 .teams {
-  display: flex;
-  flex-direction: column; /* o row si quieres fila horizontal */
-  gap: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  width: 100%;
 }
 
-.teams_players {
+.team, .list_of_players {
   display: flex;
-  flex-direction: column; /* o row si quieres fila horizontal */
-  gap: 10px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.team_player_item {
+  width: 100%;
+  text-align: center;
+  padding: 5px;
+  margin: 5px 0;
+  border: 1px solid #ddd;
+  cursor: pointer;
 }
