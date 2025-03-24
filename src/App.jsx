@@ -393,6 +393,7 @@ const App = () =>{
     
     return(
         <div className='app'>
+            <button onClick={() => setScreen("main")}>Volver</button>
             {/*-----------------------main screen-----------------------*/}
             {(screen === 'main') &&
             (<div className='main_screen'>
@@ -632,7 +633,6 @@ const App = () =>{
                     </div>
                 </div>
             )}
-            <button onClick={() => setScreen("main")}>Volver</button>
             {/* Añadir ToastContainer para mostrar notificaciones */}
             <ToastContainer position="bottom-right" />
         </div>
