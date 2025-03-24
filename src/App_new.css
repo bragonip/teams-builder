@@ -27,28 +27,3 @@
   padding: 5px;
   border: 1px solid #ddd;
 }
-
-
-
-.teams {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 20px;
-  width: 100%;
-}
-
-.list_of_players {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  flex-direction: column;
-  align-items: center;
-}
-
-.team_player_item {
-  width: 100%;
-  text-align: center;
-  padding: 5px;
-  margin: 5px 0;
-  border: 1px solid #ddd;
-  cursor: pointer;
-}
