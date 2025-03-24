@@ -610,9 +610,9 @@ const App = () =>{
                             </div>
                         ))}
                     </div>
-                    <div className='list_of_players'>
+                    <div>
                         {players.map(player => (
-                            <div key={player.name}>
+                            <div className='list_of_players' key={player.name}>
                                 <div className='team_player_item' onClick={() => addPlayerToTeam(player, true)}>
                                     <p>{'<'}</p>
                                 </div>
