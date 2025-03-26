@@ -27,3 +27,49 @@
   padding: 5px;
   border: 1px solid #ddd;
 }
+
+.skill-comparison-container {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f0f0f0;
+}
+
+.skill-comparison-bar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.skill-name {
+  width: 100px;
+  margin-right: 10px;
+}
+
+.bar-container {
+  flex-grow: 1;
+  height: 20px;
+  background-color: #e0e0e0;
+  position: relative;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: width 0.3s ease;
+}
+
+.team1-advantage {
+  background-color: #4CAF50;  /* Green for Team 1 advantage */
+  right: 50%;
+}
+
+.team2-advantage {
+  background-color: #2196F3;  /* Blue for Team 2 advantage */
+  left: 50%;
+}
