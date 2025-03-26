@@ -22,6 +22,7 @@ const App = () =>{
     const [team2, setTeam2] = useState([])
     const fileInputRef = useRef(null);
     const [playersForTeams, setPlayersForTeams] = useState([])
+    const [skillComparison, setSkillComparison] = useState({})
 
     const triggerFileInput = () => {
         fileInputRef.current.click();
@@ -390,6 +391,35 @@ const App = () =>{
         setPlayersForTeams(updatedPlayers);
     }
 
+    const calculateSkillComparison = () => {
+        const comparison = {};
+        
+        // Get all unique skills from the skills Map
+        const allSkills = Array.from(skills.keys());
+        
+        allSkills.forEach(skill => {
+            // Calculate total for each team in this skill
+            const team1Total = team1.reduce((total, player) => {
+                const rank = getPlayerRankInSkill(player, skill);
+                return total + rank;
+            }, 0);
+            
+            const team2Total = team2.reduce((total, player) => {
+                const rank = getPlayerRankInSkill(player, skill);
+                return total + rank;
+            }, 0);
+            
+            // Calculate the difference
+            comparison[skill] = team1Total - team2Total;
+        });
+        
+        setSkillComparison(comparison);
+    };
+
+    // Update skill comparison whenever teams change
+    useEffect(() => {
+        calculateSkillComparison();
+    }, [team1, team2, skills]);
     
     return(
         <div className='app'>
@@ -601,39 +631,62 @@ const App = () =>{
                 </div>
             </div>)}
             {/*-----------------------teams screen----------------------*/}
+
             {screen === "teams" && (
                 <div className="teams-container">
-            <div className="team-left">
-                {team1.map(player => (
-                <div key={player.name} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
-                    <p>{player.name}</p>
-                </div>
-                ))}
-            </div>
-            <div className="list_of_players-container">
-                {players.map(player => (
-                <div className='list_of_players' key={player.name}>
-                    <div onClick={() => addPlayerToTeam(player, true)}>
-                    <p>{'<'}</p>
+                    <div className="skill-comparison-container">
+                        {Object.entries(skillComparison).map(([skill, difference]) => (
+                            <div key={skill} className="skill-comparison-bar">
+                                <div className="skill-name">{skill}</div>
+                                <div className="bar-container">
+                                    <div 
+                                        className={`bar ${difference > 0 ? 'team1-advantage' : 'team2-advantage'}`}
+                                        style={{
+                                            width: `${Math.abs(difference) * 10}px`, // Adjust multiplier as needed
+                                            transform: difference > 0 
+                                                ? 'translateX(50%)' 
+                                                : 'translateX(-50%)'
+                                        }}
+                                    >
+                                        {Math.abs(difference)}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                    <div className='all_players_item'>
-                    <p>{player.name}</p>
+                    {/* Rest of the teams screen content */}
+                    <div className="team-left">
+                        {team1.map(player => (
+                            <div key={player.name} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
+                                <p>{player.name}</p>
+                            </div>
+                        ))}
                     </div>
-                    <div onClick={() => addPlayerToTeam(player, false)}>
-                    <p>{'>'}</p>
+                    <div className="list_of_players-container">
+                        {players.map(player => (
+                            <div className='list_of_players' key={player.name}>
+                                <div onClick={() => addPlayerToTeam(player, true)}>
+                                    <p>{'<'}</p>
+                                </div>
+                                <div className='all_players_item'>
+                                    <p>{player.name}</p>
+                                </div>
+                                <div onClick={() => addPlayerToTeam(player, false)}>
+                                    <p>{'>'}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="team-right">
+                        {team2.map(player => (
+                            <div key={player.name} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
+                                <p>{player.name}</p>
+                            </div>
+                        ))}
                     </div>
                 </div>
-                ))}
-            </div>
-            <div className="team-right">
-                {team2.map(player => (
-                <div key={player.name} className='team_player_item' onClick={() => removePlayerFromTeam(player)}>
-                    <p>{player.name}</p>
-                </div>
-                ))}
-            </div>
-            </div>)}
-            {/* Añadir ToastContainer para mostrar notificaciones */}
+            )}
+            
             <ToastContainer position="bottom-right" />
         </div>
     )
